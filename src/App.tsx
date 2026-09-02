@@ -52,11 +52,16 @@ function App() {
 
 
   useEffect(() => {
+    const themeColor = isDarkMode ? '#09090b' : '#f8fafc';
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // Mobil telefonlarda bildirim ve durum çubuğu rengini temayla anında eşitle
+    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+    metaTags.forEach(tag => tag.setAttribute('content', themeColor));
   }, [isDarkMode]);
 
   const initialSeconds = timerMode === 'countdown' ? countdownTotalSeconds : 0;

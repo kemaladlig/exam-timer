@@ -13,8 +13,8 @@ export default defineConfig({
         name: 'Sınav Kronometresi',
         short_name: 'Kronometre',
         description: 'Sınav ve denemeler için odaklanma kronometresi',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
+        theme_color: '#f8fafc',
+        background_color: '#f8fafc',
         display: 'standalone',
         icons: [
           {
