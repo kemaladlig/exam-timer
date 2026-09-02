@@ -1,59 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
   <defs>
-    <!-- Background Gradient -->
+    <!-- Deep Navy Gradient Background (Full Bleed) -->
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#1e293b"/>
-      <stop offset="100%" stop-color="#090d16"/>
+      <stop offset="0%" stop-color="#14213d"/>
+      <stop offset="100%" stop-color="#080e1e"/>
     </linearGradient>
 
-    <!-- Cyan to Blue Neon Gradient -->
-    <linearGradient id="timerGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+    <!-- Electric Cyan Glowing Gradient -->
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#38bdf8"/>
-      <stop offset="100%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#00f2fe"/>
     </linearGradient>
 
-    <!-- Glowing Accent -->
-    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="12" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <!-- Subtle Glow for Progress Arc -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
     </filter>
   </defs>
 
-  <!-- Rounded Squircle Container -->
-  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
-  
-  <!-- Subtle border highlight -->
-  <rect width="508" height="508" x="2" y="2" rx="126" stroke="#334155" stroke-width="3" stroke-opacity="0.6"/>
+  <!-- Full Bleed Background -->
+  <rect width="512" height="512" fill="url(#bgGrad)"/>
 
-  <!-- Stopwatch Top Button & Ring -->
-  <g transform="translate(0, 16)">
+  <!-- Stopwatch Group -->
+  <g transform="translate(0, 10)">
     <!-- Top Crown -->
-    <rect x="232" y="58" width="48" height="34" rx="8" fill="url(#timerGrad)" />
-    <rect x="216" y="44" width="80" height="20" rx="6" fill="#38bdf8" />
-    
+    <rect x="226" y="78" width="60" height="34" rx="8" fill="#ffffff"/>
+    <rect x="210" y="64" width="92" height="18" rx="7" fill="#ffffff"/>
+
     <!-- Top Right Lap Button -->
-    <rect x="360" y="96" width="36" height="18" rx="6" fill="#38bdf8" transform="rotate(45 360 96)" />
+    <rect x="366" y="112" width="38" height="22" rx="7" fill="#ffffff" transform="rotate(45 366 112)"/>
 
-    <!-- Outer Stopwatch Ring -->
-    <circle cx="256" cy="266" r="144" stroke="url(#timerGrad)" stroke-width="28" stroke-linecap="round" />
+    <!-- Stopwatch Outer Ring -->
+    <circle cx="256" cy="276" r="162" stroke="#ffffff" stroke-width="26"/>
 
-    <!-- Inner Tick Marks -->
-    <circle cx="256" cy="266" r="102" stroke="#1e293b" stroke-width="12" stroke-dasharray="8 24" />
+    <!-- Inner Glowing Electric Cyan Progress Ring (3/4 circle) -->
+    <circle cx="256" cy="276" r="116" stroke="url(#cyanGrad)" stroke-width="18" stroke-linecap="round" stroke-dasharray="540 200" transform="rotate(-90 256 276)" filter="url(#neonGlow)"/>
 
-    <!-- Timer Hand / Arrow pointing at ~10 minutes (Study Progress) -->
-    <line x1="256" y1="266" x2="256" y2="162" stroke="#ffffff" stroke-width="14" stroke-linecap="round" />
-    <circle cx="256" cy="266" r="18" fill="#ffffff" />
-    <circle cx="256" cy="266" r="8" fill="#2563eb" />
+    <!-- Center Clock Hands (10:10 Focus Angle) -->
+    <circle cx="256" cy="276" r="14" fill="#ffffff"/>
+    
+    <!-- Hour Hand (Pointing at ~10 o'clock) -->
+    <line x1="256" y1="276" x2="198" y2="218" stroke="#ffffff" stroke-width="16" stroke-linecap="round"/>
 
-    <!-- Mini Graduation Cap Accent on Top Right -->
-    <g transform="translate(320, 140) scale(0.95)" filter="url(#glow)">
-      <!-- Cap Top Diamond -->
-      <polygon points="40,10 80,30 40,50 0,30" fill="#38bdf8" />
-      <!-- Cap Base -->
-      <path d="M15,38 Q40,56 65,38 L65,52 Q40,70 15,52 Z" fill="#2563eb" />
-      <!-- Tassel -->
-      <path d="M40,30 Q78,42 74,68" stroke="#ffffff" stroke-width="4" fill="none" stroke-linecap="round" />
-      <circle cx="74" cy="72" r="5" fill="#ffffff" />
-    </g>
+    <!-- Minute Hand (Pointing at ~2 o'clock) -->
+    <line x1="256" y1="276" x2="332" y2="200" stroke="#ffffff" stroke-width="16" stroke-linecap="round"/>
   </g>
 </svg>

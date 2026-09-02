@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'app-icon.png'],
       manifest: {
         name: 'Sınav Kronometresi',
         short_name: 'Kronometre',
@@ -17,6 +17,12 @@ export default defineConfig({
         background_color: '#f8fafc',
         display: 'standalone',
         icons: [
+          {
+            src: 'app-icon.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable'
+          },
           {
             src: 'favicon.svg',
             sizes: '192x192 512x512',
