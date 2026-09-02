@@ -14,7 +14,7 @@ export default defineConfig({
         short_name: 'Kronometre',
         description: 'Sınav ve denemeler için odaklanma kronometresi',
         theme_color: '#f8fafc',
-        background_color: '#f8fafc',
+        background_color: '#ffffff',
         display: 'standalone',
         icons: [
           {
