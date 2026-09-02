@@ -73,36 +73,38 @@ export function TimerControls({
         )}
       </button>
 
-      {/* Sınavı / Seansı Bitir (Kırmızı Kare) */}
-      {hasStarted ? (
+      {/* Sınavı / Seansı Bitir (Kırmızı Kare - Sadece durdurulunca görünür) */}
+      {!isRunning && hasStarted ? (
         <button
           type="button"
           onClick={onFinishSession}
-          className="rounded-full w-12 h-12 shadow flex items-center justify-center transition-transform active:scale-95 bg-red-100 hover:bg-red-500 text-red-600 hover:text-white dark:bg-red-950/40 dark:hover:bg-red-600 dark:text-red-400 dark:hover:text-white border border-red-200 dark:border-red-900/60 shrink-0"
+          className="rounded-full w-12 h-12 shadow flex items-center justify-center transition-all animate-in fade-in zoom-in-95 duration-200 active:scale-95 bg-red-100 hover:bg-red-500 text-red-600 hover:text-white dark:bg-red-950/40 dark:hover:bg-red-600 dark:text-red-400 dark:hover:text-white border border-red-200 dark:border-red-900/60 shrink-0 cursor-pointer"
           title="Seansı Bitir ve Kaydet"
         >
           <Square size={20} fill="currentColor" />
         </button>
-      ) : (
+      ) : !hasStarted ? (
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleFullscreen}
           title={isFullscreen ? 'Tam Ekrandan Çık' : 'Tam Ekran Yap'}
-          className="rounded-full w-12 h-12 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white"
+          className="rounded-full w-12 h-12 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white cursor-pointer"
         >
           {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
         </Button>
+      ) : (
+        <div className="w-12 h-12" />
       )}
 
-      {/* Fullscreen Butonu */}
+      {/* Fullscreen Butonu (Süre başladıktan sonra) */}
       {hasStarted && (
         <Button
           variant="ghost"
           size="icon"
           onClick={onToggleFullscreen}
           title={isFullscreen ? 'Tam Ekrandan Çık' : 'Tam Ekran Yap'}
-          className="rounded-full w-12 h-12 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-white"
+          className="rounded-full w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900 dark:text-zinc-500 dark:hover:text-white ml-1 cursor-pointer"
         >
           {isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
         </Button>

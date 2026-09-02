@@ -165,7 +165,7 @@ function App() {
   const hasStarted = elapsedSeconds > 0 || isRunning;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 font-sans relative transition-colors duration-200">
+    <div className="min-h-screen flex-1 flex flex-col bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 font-sans relative transition-colors duration-200">
       
       {/* Top Navbar */}
       <header className="px-5 py-3.5 flex justify-between items-center absolute top-0 left-0 w-full z-20">
@@ -310,8 +310,8 @@ function App() {
         </div>
 
         {/* Scrollable Checkpoints below the timer */}
-        <div className="flex-1 w-full bg-slate-100/70 dark:bg-zinc-900/40 border-t border-slate-200/80 dark:border-zinc-800/80 mt-2">
-           <div className={`transition-opacity duration-300 ${hasStarted ? 'opacity-100' : 'opacity-95'}`}>
+        <div className="flex-1 w-full bg-slate-100/70 dark:bg-zinc-900/40 border-t border-slate-200/80 dark:border-zinc-800/80 mt-2 flex flex-col justify-between">
+           <div className={`flex-1 transition-opacity duration-300 ${hasStarted ? 'opacity-100' : 'opacity-95'}`}>
              <CheckpointList 
                 sections={sections} 
                 checkpoints={activeSession.checkpoints}
