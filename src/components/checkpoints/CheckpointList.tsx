@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { BookmarkPlus, RotateCcw, Plus, ChevronDown, ChevronUp, Clock, X, Pin, CheckCircle2, GraduationCap, BookOpen, Layers } from 'lucide-react';
-import type { SectionConfig, CheckpointRecord } from '../../types';
+import { BookmarkPlus, RotateCcw, Plus, ChevronDown, ChevronUp, Clock, X, Pin, CheckCircle2, BookmarkCheck, Layers, Sparkles } from 'lucide-react';
+import type { SectionConfig, CheckpointRecord, CustomPreset } from '../../types';
+import { EXAM_PRESETS } from '../../constants/presets';
 import { CheckpointCard } from './CheckpointCard';
 import { Button } from '../ui/Button';
 import { formatSeconds } from '../../utils';
@@ -14,7 +15,7 @@ interface CheckpointListProps {
   onRemoveCheckpoint: (checkpointId: string) => void;
   onAddSection: (name: string) => void;
   onRemoveSection: (sectionId: string) => void;
-  onResetSections: (type: 'kpss' | 'tyt' | 'clear') => void;
+  onApplyPreset: (sections: SectionConfig[], durationSeconds?: number) => void;
   hasStarted: boolean;
 }
 
@@ -27,12 +28,24 @@ export function CheckpointList({
   onRemoveCheckpoint,
   onAddSection,
   onRemoveSection,
-  onResetSections,
+  onApplyPreset,
   hasStarted,
 }: CheckpointListProps) {
   const [newSectionName, setNewSectionName] = useState('');
   const [isAdding, setIsAdding] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+
+  // Kullanıcının özel kaydettiği ders grupları (LocalStorage'da kalıcı saklanır)
+  const [customPresets, setCustomPresets] = useState<CustomPreset[]>(() => {
+    try {
+      const saved = localStorage.getItem('exam_custom_presets');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isSavingGroup, setIsSavingGroup] = useState(false);
+  const [groupName, setGroupName] = useState('');
 
   const hasCheckpoints = checkpoints.length > 0;
   const allRecordedCheckpoints = [...checkpoints].reverse();
@@ -48,6 +61,36 @@ export function CheckpointList({
     }
   };
 
+  const handleSaveGroup = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!groupName.trim() || sections.length === 0) return;
+    const newPreset: CustomPreset = {
+      id: 'custom-' + Date.now(),
+      name: groupName.trim(),
+      sections: [...sections],
+    };
+    const updated = [...customPresets, newPreset];
+    setCustomPresets(updated);
+    try {
+      localStorage.setItem('exam_custom_presets', JSON.stringify(updated));
+    } catch (err) {
+      console.error(err);
+    }
+    setGroupName('');
+    setIsSavingGroup(false);
+  };
+
+  const handleDeleteGroup = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const updated = customPresets.filter(p => p.id !== id);
+    setCustomPresets(updated);
+    try {
+      localStorage.setItem('exam_custom_presets', JSON.stringify(updated));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   return (
     <div className="w-full max-w-xl mx-auto flex flex-col gap-3 px-4 pb-16 mt-2">
       
@@ -56,35 +99,116 @@ export function CheckpointList({
         <div className="space-y-3 animate-in fade-in duration-300">
           {/* Hızlı Sınav Seçici Segment */}
           <div className="flex flex-col gap-1.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 px-1">
-              Sınav Formatı
-            </span>
-            <div className="grid grid-cols-3 gap-1.5 p-1 rounded-xl bg-slate-200/70 dark:bg-zinc-800/80">
+            <div className="flex items-center justify-between px-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500">
+                Sınav Formatı
+              </span>
+              {sections.length > 0 && !isSavingGroup && (
+                <button
+                  type="button"
+                  onClick={() => setIsSavingGroup(true)}
+                  className="text-[11px] font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1 cursor-pointer"
+                  title="Mevcut ders listesini özel grup olarak kaydet"
+                >
+                  <BookmarkCheck size={12} />
+                  <span>Bu Grubu Kaydet</span>
+                </button>
+              )}
+            </div>
+
+            {/* Özel Grup Kaydetme Girişi */}
+            {isSavingGroup && (
+              <form onSubmit={handleSaveGroup} className="flex gap-1.5 items-center p-2 rounded-xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900 animate-in fade-in duration-150">
+                <input
+                  type="text"
+                  value={groupName}
+                  onChange={(e) => setGroupName(e.target.value)}
+                  placeholder="Grup / Sınav adı (örn. AGS, Deneme 1)..."
+                  autoFocus
+                  className="flex-1 px-3 py-1.5 rounded-lg border border-blue-300 dark:border-blue-800 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 text-xs focus:outline-none font-medium"
+                />
+                <Button type="submit" size="sm" className="py-1.5 px-3 text-xs rounded-lg font-semibold bg-blue-600 hover:bg-blue-700 text-white">
+                  Kaydet
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsSavingGroup(false)}
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </form>
+            )}
+
+            {/* Hazır Sınav Formatları (KPSS, TYT, AGS, ALES, Temizle) */}
+            <div className="flex flex-wrap gap-1.5 p-1 rounded-xl bg-slate-200/70 dark:bg-zinc-800/80">
+              {EXAM_PRESETS.map((preset) => {
+                const shortLabel = preset.id === 'kpss-lisans' 
+                  ? 'KPSS' 
+                  : preset.id === 'yks-tyt' 
+                    ? 'TYT' 
+                    : preset.id === 'meb-ags' 
+                      ? 'AGS' 
+                      : preset.id === 'osym-ales' 
+                        ? 'ALES' 
+                        : preset.name.split(' ')[0];
+
+                return (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    onClick={() => onApplyPreset(preset.sections, preset.totalDurationSeconds)}
+                    className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-xs hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                    title={preset.name}
+                  >
+                    <span>{shortLabel}</span>
+                  </button>
+                );
+              })}
+
               <button
                 type="button"
-                onClick={() => onResetSections('kpss')}
-                className="py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-xs hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                onClick={() => onApplyPreset([])}
+                className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 shadow-xs hover:text-red-500 dark:hover:text-red-400 cursor-pointer ml-auto"
+                title="Ders listesini boşalt"
               >
-                <GraduationCap size={14} className="text-blue-500" />
-                <span>KPSS</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onResetSections('tyt')}
-                className="py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-xs hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
-              >
-                <BookOpen size={14} className="text-blue-500" />
-                <span>TYT</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => onResetSections('clear')}
-                className="py-2 px-2 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 shadow-xs hover:text-red-500 dark:hover:text-red-400 cursor-pointer"
-              >
-                <Layers size={14} className="text-slate-400" />
+                <Layers size={13} />
                 <span>Temizle</span>
               </button>
             </div>
+
+            {/* Kullanıcının Özel Grupları */}
+            {customPresets.length > 0 && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 px-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 mr-1 flex items-center gap-0.5">
+                  <Sparkles size={10} className="text-amber-500" />
+                  Özel Gruplar:
+                </span>
+                {customPresets.map((cp) => (
+                  <div
+                    key={cp.id}
+                    className="inline-flex items-center gap-1 py-1 px-2.5 rounded-lg text-xs font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-900/60 shadow-xs"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => onApplyPreset(cp.sections, cp.totalDurationSeconds)}
+                      className="cursor-pointer hover:underline"
+                      title={`${cp.sections.length} dersi yükle`}
+                    >
+                      {cp.name} ({cp.sections.length})
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteGroup(cp.id, e)}
+                      className="text-blue-400 hover:text-red-500 transition-colors p-0.5 ml-1 cursor-pointer"
+                      title="Bu özel grubu sil"
+                    >
+                      <X size={12} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Ders Listesi Başlığı & Ders Sayısı */}

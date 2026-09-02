@@ -15,3 +15,10 @@ export interface ExamTemplate {
   totalDurationSeconds: number;
   sections: SectionConfig[];
 }
+
+export interface CustomPreset {
+  id: string;
+  name: string;
+  sections: SectionConfig[];
+  totalDurationSeconds?: number;
+}

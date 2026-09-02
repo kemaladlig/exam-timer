@@ -138,24 +138,12 @@ function App() {
     setSections(prev => prev.filter(s => s.id !== sectionId));
   };
 
-  const handleResetSections = (type: 'kpss' | 'tyt' | 'clear') => {
-    if (type === 'kpss') {
-      const kpss = EXAM_PRESETS.find(p => p.id === 'kpss-lisans');
-      if (kpss) {
-        setSections(kpss.sections);
-        setCountdownTotalSeconds(kpss.totalDurationSeconds);
-        resetTimer();
-      }
-    } else if (type === 'tyt') {
-      const tyt = EXAM_PRESETS.find(p => p.id === 'yks-tyt');
-      if (tyt) {
-        setSections(tyt.sections);
-        setCountdownTotalSeconds(tyt.totalDurationSeconds);
-        resetTimer();
-      }
-    } else {
-      setSections([]);
+  const handleApplyPreset = (newSections: SectionConfig[], durationSeconds?: number) => {
+    setSections(newSections);
+    if (durationSeconds && durationSeconds > 0) {
+      setCountdownTotalSeconds(durationSeconds);
     }
+    resetTimer();
   };
 
   const handleDirectDownloadReport = (sessionToDownload: ExamSession) => {
@@ -333,7 +321,7 @@ function App() {
                 onRemoveCheckpoint={removeCheckpoint}
                 onAddSection={handleAddSection}
                 onRemoveSection={handleRemoveSection}
-                onResetSections={handleResetSections}
+                onApplyPreset={handleApplyPreset}
                 hasStarted={hasStarted}
               />
            </div>
