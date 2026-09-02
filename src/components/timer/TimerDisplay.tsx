@@ -15,8 +15,6 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ 
   displayedSeconds, 
-  remainingSeconds, 
-  mode, 
   format,
   isEditable = false,
   onDurationChange
@@ -25,9 +23,6 @@ export function TimerDisplay({
   const [inputMinutes, setInputMinutes] = useState('0');
   
   const minInputRef = useRef<HTMLInputElement>(null);
-
-  const isWarning = mode === 'countdown' && remainingSeconds <= 15 * 60 && remainingSeconds > 5 * 60;
-  const isCritical = mode === 'countdown' && remainingSeconds <= 5 * 60;
 
   useEffect(() => {
     if (!isEditing) {
@@ -55,11 +50,7 @@ export function TimerDisplay({
     }
   };
 
-  const colorClass = isCritical 
-    ? "text-slate-900 dark:text-white drop-shadow-[0_0_25px_rgba(239,68,68,0.3)]" 
-    : isWarning 
-      ? "text-slate-900 dark:text-white drop-shadow-[0_0_20px_rgba(245,158,11,0.2)]" 
-      : "text-slate-900 dark:text-white";
+  const colorClass = "text-slate-900 dark:text-white";
 
   return (
     <div className="flex flex-col items-center justify-center w-full py-2">
@@ -118,17 +109,6 @@ export function TimerDisplay({
           )}
         >
           {formatSeconds(displayedSeconds, format)}
-        </div>
-      )}
-
-      {/* Subtle warnings underneath */}
-      {!isEditing && (isWarning || isCritical) && (
-        <div className="mt-1 animate-pulse">
-           {isCritical ? (
-             <span className="text-xs font-semibold text-red-500/80 bg-red-500/10 px-2.5 py-0.5 rounded-full tracking-wider">SON 5 DAKİKA</span>
-           ) : (
-             <span className="text-xs font-semibold text-amber-500/80 bg-amber-500/10 px-2.5 py-0.5 rounded-full tracking-wider">SON 15 DAKİKA</span>
-           )}
         </div>
       )}
     </div>

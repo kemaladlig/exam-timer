@@ -42,6 +42,7 @@ export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
         accumulatedElapsedRef.current = initialSeconds;
         setIsRunning(false);
         clearInterval(intervalId);
+        playCompletionSound();
         onFinishRef.current?.();
       } else {
         setElapsedSeconds(totalElapsed);
@@ -68,42 +69,6 @@ export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
   const remainingSeconds = Math.max(0, initialSeconds - elapsedSeconds);
   const displayedSeconds = mode === 'countdown' ? remainingSeconds : elapsedSeconds;
 
-  // Subtle audio alerts for 15m and 5m remaining
-  const playedAlertsRef = useRef<Set<number>>(new Set());
-
-  useEffect(() => {
-    if (mode === 'countdown' && isRunning && initialSeconds > 0) {
-      const remaining = initialSeconds - elapsedSeconds;
-      
-      // 900s = 15m, 300s = 5m
-      if ((remaining === 900 || remaining === 300) && !playedAlertsRef.current.has(remaining)) {
-        playedAlertsRef.current.add(remaining);
-        
-        try {
-          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-          const osc = ctx.createOscillator();
-          const gain = ctx.createGain();
-          
-          osc.type = 'sine';
-          // 15m = lower pitch (440Hz), 5m = slightly higher pitch (523Hz)
-          osc.frequency.setValueAtTime(remaining === 300 ? 523.25 : 440, ctx.currentTime);
-          
-          gain.gain.setValueAtTime(0, ctx.currentTime);
-          gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
-          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
-          
-          osc.connect(gain);
-          gain.connect(ctx.destination);
-          
-          osc.start(ctx.currentTime);
-          osc.stop(ctx.currentTime + 1.5);
-        } catch (e) {
-          console.error("Audio playback failed for timer alert", e);
-        }
-      }
-    }
-  }, [elapsedSeconds, isRunning, mode, initialSeconds]);
-
   return {
     elapsedSeconds,
     remainingSeconds,
@@ -112,4 +77,49 @@ export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
     toggleTimer,
     resetTimer,
   };
+}
+
+/**
+ * Süre dolduğunda çalan huzurlu ve net melodi (Web Audio API)
+ * Dışarıdan MP3 dosyası gerektirmez, çevrimdışı da anında çalar.
+ */
+function playCompletionSound() {
+  try {
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+
+    // 4 tonlu uyumlu melodi: C5, E5, G5, C6 (Hafif ve net tamamlama çanı)
+    const notes = [
+      { freq: 523.25, time: 0, dur: 0.5 },
+      { freq: 659.25, time: 0.16, dur: 0.5 },
+      { freq: 783.99, time: 0.32, dur: 0.6 },
+      { freq: 1046.50, time: 0.48, dur: 1.6 },
+    ];
+
+    notes.forEach(({ freq, time, dur }) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + time);
+
+      gain.gain.setValueAtTime(0, ctx.currentTime + time);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + time + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + time + dur);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(ctx.currentTime + time);
+      osc.stop(ctx.currentTime + time + dur);
+    });
+
+    // Mobil telefonlarda titreşim desteği
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([250, 100, 250, 100, 400]);
+    }
+  } catch (e) {
+    console.warn('Completion sound could not be played:', e);
+  }
 }
