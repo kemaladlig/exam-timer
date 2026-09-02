@@ -12,8 +12,9 @@ import { formatDurationHuman } from './utils';
 
 const PRESET_DURATIONS = [
   { label: '130 dk (KPSS)', minutes: 130 },
-  { label: '120 dk', minutes: 120 },
   { label: '165 dk (TYT)', minutes: 165 },
+  { label: '110 dk (AGS)', minutes: 110 },
+  { label: '150 dk (ALES)', minutes: 150 },
   { label: '60 dk', minutes: 60 },
   { label: '45 dk', minutes: 45 },
   { label: '30 dk', minutes: 30 },
