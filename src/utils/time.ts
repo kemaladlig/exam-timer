@@ -10,8 +10,11 @@ export const formatSeconds = (totalSeconds: number, format: TimeDisplayFormat = 
   const seconds = totalSeconds % 60;
   const paddedSeconds = String(seconds).padStart(2, '0');
 
-  // Sadece dakika: "130 dk"
+  // Sadece dakika: "130 dk" (Son 1 dakika kaldığında veya 60 saniyenin altında saniyeye geçer: "59 sn")
   if (format === 'm_only') {
+    if (totalSeconds < 60) {
+      return `${totalSeconds} sn`;
+    }
     const totalMinutes = Math.floor(totalSeconds / 60);
     return `${totalMinutes} dk`;
   }
