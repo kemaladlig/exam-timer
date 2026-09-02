@@ -1,0 +1,384 @@
+import { useState, useEffect } from 'react';
+import { TimerDisplay } from './components/timer/TimerDisplay';
+import { TimerControls } from './components/timer/TimerControls';
+import { CheckpointList } from './components/checkpoints/CheckpointList';
+import { SessionSummaryModal } from './components/stats/SessionSummaryModal';
+import { useExamSession, useTimer, useFullscreen, useWakeLock } from './hooks';
+import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession } from './types';
+import { EXAM_PRESETS } from './constants/presets';
+import { Moon, Sun, ArrowDownUp, FileDown, X, Eye } from 'lucide-react';
+import { Button } from './components/ui/Button';
+import { formatDurationHuman } from './utils';
+
+const PRESET_DURATIONS = [
+  { label: '130 dk (KPSS)', minutes: 130 },
+  { label: '120 dk', minutes: 120 },
+  { label: '165 dk (TYT)', minutes: 165 },
+  { label: '60 dk', minutes: 60 },
+  { label: '45 dk', minutes: 45 },
+  { label: '30 dk', minutes: 30 },
+];
+
+function App() {
+  const { 
+    activeSession, 
+    startSession, 
+    addCheckpoint, 
+    addGenericCheckpoint,
+    undoLastCheckpoint,
+    removeCheckpoint,
+    finishSession,
+    clearSession 
+  } = useExamSession();
+
+  const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Varsayılan format 'mm:ss' (Dakika : Saniye)
+  const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('mm:ss');
+  
+  // Non-blocking report state
+  const [lastFinishedSession, setLastFinishedSession] = useState<ExamSession | null>(null);
+  const [showDetailedModal, setShowDetailedModal] = useState(false);
+
+  // Dynamic sections state (initialized with KPSS by default)
+  const [sections, setSections] = useState<SectionConfig[]>(() => {
+    return EXAM_PRESETS.find(p => p.id === 'kpss-lisans')?.sections || [];
+  });
+
+  // Mode state: stopwatch or countdown
+  const [timerMode, setTimerMode] = useState<TimerMode>('stopwatch');
+  const [countdownTotalSeconds, setCountdownTotalSeconds] = useState<number>(130 * 60);
+
+  // Auto-start session on mount if it doesn't exist
+  useEffect(() => {
+    if (!activeSession) {
+      const preset = EXAM_PRESETS.find(p => p.id === 'kpss-lisans') || EXAM_PRESETS[0];
+      startSession({ 
+        ...preset, 
+        sections,
+        defaultMode: timerMode,
+        totalDurationSeconds: timerMode === 'countdown' ? countdownTotalSeconds : 0
+      });
+    }
+  }, [activeSession, startSession, timerMode, countdownTotalSeconds, sections]);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
+
+  const initialSeconds = timerMode === 'countdown' ? countdownTotalSeconds : 0;
+
+  const handleTimerFinish = () => {
+    handleFinishExam();
+  };
+
+  const { 
+    elapsedSeconds, 
+    remainingSeconds,
+    displayedSeconds,
+    isRunning, 
+    toggleTimer, 
+    resetTimer 
+  } = useTimer({
+    initialSeconds,
+    mode: timerMode,
+    onFinish: handleTimerFinish,
+  });
+
+  // Ekranı süre akarken sessizce arka planda açık tutuyoruz (UI yazısına gerek yok!)
+  useWakeLock(isRunning);
+
+  const handleFinishExam = () => {
+    if (activeSession) {
+      const completed: ExamSession = {
+        ...activeSession,
+        totalElapsedSeconds: elapsedSeconds,
+        completedAt: Date.now(),
+      };
+      setLastFinishedSession(completed);
+      finishSession(elapsedSeconds);
+    }
+    
+    if (isRunning) toggleTimer(); 
+    resetTimer();
+    clearSession();
+    if (isFullscreen) toggleFullscreen(); 
+  };
+
+  const handleQuickReset = () => {
+    if (isRunning) toggleTimer();
+    resetTimer();
+    clearSession();
+  };
+
+  const handleChangeMode = (newMode: TimerMode) => {
+    if (isRunning) toggleTimer();
+    setTimerMode(newMode);
+    resetTimer();
+  };
+
+  const handleSelectCountdownDuration = (totalSeconds: number) => {
+    if (isRunning) toggleTimer();
+    setCountdownTotalSeconds(totalSeconds);
+    resetTimer();
+  };
+
+  // Section management functions
+  const handleAddSection = (name: string) => {
+    const newSec: SectionConfig = {
+      id: 'sec-' + Date.now(),
+      name,
+    };
+    setSections(prev => [...prev, newSec]);
+  };
+
+  const handleRemoveSection = (sectionId: string) => {
+    setSections(prev => prev.filter(s => s.id !== sectionId));
+  };
+
+  const handleResetSections = (type: 'kpss' | 'tyt' | 'clear') => {
+    if (type === 'kpss') {
+      const kpss = EXAM_PRESETS.find(p => p.id === 'kpss-lisans');
+      if (kpss) setSections(kpss.sections);
+    } else if (type === 'tyt') {
+      const tyt = EXAM_PRESETS.find(p => p.id === 'yks-tyt');
+      if (tyt) setSections(tyt.sections);
+    } else {
+      setSections([]);
+    }
+  };
+
+  const handleDirectDownloadReport = (sessionToDownload: ExamSession) => {
+    const header = `Sınav Raporu: ${sessionToDownload.examTitle}\nTarih: ${new Date(sessionToDownload.startedAt).toLocaleString()}\nToplam Süre: ${formatDurationHuman(sessionToDownload.totalElapsedSeconds)}\n\n`;
+    const details = sessionToDownload.checkpoints.map((cp, idx) => {
+      return `#${idx + 1} - ${cp.sectionName}: ${cp.deltaSeconds}sn`;
+    }).join('\n');
+    
+    const blob = new Blob([header + details], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Sinav_Raporu_${sessionToDownload.examTitle.replace(/\s+/g, '_')}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  if (!activeSession) return null;
+
+  const hasStarted = elapsedSeconds > 0 || isRunning;
+
+  return (
+    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 font-sans relative transition-colors duration-200">
+      
+      {/* Top Navbar */}
+      <header className="px-5 py-3.5 flex justify-between items-center absolute top-0 left-0 w-full z-20">
+        <div className="font-extrabold text-base tracking-tight flex items-center gap-2">
+          <span className="text-slate-900 dark:text-white">Sınav Sayacı</span>
+          {lastFinishedSession && (
+            <button
+              onClick={() => setShowDetailedModal(true)}
+              className="text-xs bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-900 px-2.5 py-1 rounded-lg font-bold hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+              title="Son seans raporunu incele"
+            >
+              <Eye size={12} />
+              Son Seans
+            </button>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* 3 Modlu Süre Biçimi: Dk:Sn -> Saat:Dk:Sn -> Sadece Dk */}
+          <button
+            type="button"
+            onClick={() => {
+              setTimeFormat(prev => {
+                if (prev === 'mm:ss') return 'hh:mm:ss';
+                if (prev === 'hh:mm:ss') return 'm_only';
+                return 'mm:ss';
+              });
+            }}
+            className="text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center gap-1"
+            title="Biçimi değiştir: Dk:Sn / Saat:Dk:Sn / Sadece Dk"
+          >
+            <span>
+              {timeFormat === 'mm:ss' && 'Dk : Sn'}
+              {timeFormat === 'hh:mm:ss' && 'Saat : Dk : Sn'}
+              {timeFormat === 'm_only' && 'Sadece Dk'}
+            </span>
+          </button>
+
+          {/* Tema Değiştirici */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setIsDarkMode(!isDarkMode)}
+            title="Temayı Değiştir"
+            className="rounded-full w-9 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 cursor-pointer"
+          >
+            {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col overflow-y-auto z-10 pt-14">
+        
+        {/* Timer Section */}
+        <div className="flex flex-col items-center justify-center pt-2 md:pt-6 pb-2">
+          
+          {/* Mode Switch Tabs (Sadece süre başlamadıysa görünür) */}
+          {!hasStarted && (
+            <div className="flex items-center p-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs mb-2 text-xs font-semibold">
+              <button
+                onClick={() => handleChangeMode('countdown')}
+                className={`px-4 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer ${
+                  timerMode === 'countdown'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                <ArrowDownUp size={13} />
+                Geri Sayım
+              </button>
+              <button
+                onClick={() => handleChangeMode('stopwatch')}
+                className={`px-4 py-1.5 rounded-full transition-all cursor-pointer ${
+                  timerMode === 'stopwatch'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+              >
+                Kronometre
+              </button>
+            </div>
+          )}
+
+          {/* Huge Timer Display with Direct Inline Editing (Dakika & Saniye) */}
+          <TimerDisplay 
+            displayedSeconds={displayedSeconds}
+            remainingSeconds={remainingSeconds}
+            mode={timerMode}
+            format={timeFormat}
+            isEditable={timerMode === 'countdown' && !hasStarted}
+            onDurationChange={handleSelectCountdownDuration}
+          />
+
+          {/* Countdown Quick Presets */}
+          {timerMode === 'countdown' && !hasStarted && (
+            <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-md px-4 mt-1 mb-3 animate-in fade-in duration-200">
+              {PRESET_DURATIONS.map((preset) => (
+                <button
+                  key={preset.minutes}
+                  onClick={() => handleSelectCountdownDuration(preset.minutes * 60)}
+                  className={`text-xs px-3 py-1.5 rounded-full font-semibold border transition-all cursor-pointer ${
+                    countdownTotalSeconds === preset.minutes * 60
+                      ? 'bg-blue-50 border-blue-600 text-blue-700 dark:bg-blue-950 dark:border-blue-500 dark:text-blue-300 shadow-xs'
+                      : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                  }`}
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Controls right next to the timer */}
+          <div className="mt-1 w-full max-w-sm px-4">
+             <TimerControls 
+                isRunning={isRunning}
+                isFullscreen={isFullscreen}
+                onToggleTimer={toggleTimer}
+                onFinishSession={handleFinishExam}
+                onResetTimer={handleQuickReset}
+                onToggleFullscreen={toggleFullscreen}
+                hasStarted={hasStarted}
+              />
+          </div>
+        </div>
+
+        {/* Scrollable Checkpoints below the timer */}
+        <div className="flex-1 w-full bg-slate-100/70 dark:bg-zinc-900/40 border-t border-slate-200/80 dark:border-zinc-800/80 mt-2">
+           <div className={`transition-opacity duration-300 ${hasStarted ? 'opacity-100' : 'opacity-95'}`}>
+             <CheckpointList 
+                sections={sections} 
+                checkpoints={activeSession.checkpoints}
+                onCompleteSection={(id, name) => addCheckpoint(id, name, elapsedSeconds)}
+                onGenericCheckpoint={(name) => addGenericCheckpoint(elapsedSeconds, name)}
+                onUndoLastCheckpoint={undoLastCheckpoint}
+                onRemoveCheckpoint={removeCheckpoint}
+                onAddSection={handleAddSection}
+                onRemoveSection={handleRemoveSection}
+                onResetSections={handleResetSections}
+                hasStarted={hasStarted}
+              />
+           </div>
+           {!hasStarted && (
+             <div className="text-center pb-6 text-slate-500 dark:text-zinc-400 font-medium text-xs">
+               {timerMode === 'countdown' ? 'Süreyi belirleyip Play tuşuna basın.' : 'Başlamak için Play tuşuna basın.'}
+             </div>
+           )}
+        </div>
+      </main>
+
+      {/* Engellemeyen Zarif Seans Özeti Bildirimi */}
+      {lastFinishedSession && (
+        <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom-5 duration-300">
+          <div className="p-3.5 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between gap-3 text-slate-900 dark:text-white">
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span>✓ Seans Tamamlandı</span>
+              </div>
+              <div className="text-xs font-mono tabular-nums text-slate-600 dark:text-zinc-400 font-semibold truncate">
+                {formatDurationHuman(lastFinishedSession.totalElapsedSeconds)} • {lastFinishedSession.checkpoints.length} kayıt
+              </div>
+            </div>
+
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                onClick={() => handleDirectDownloadReport(lastFinishedSession)}
+                className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                title="Raporu indir"
+              >
+                <FileDown size={14} />
+                İndir
+              </button>
+              <button
+                onClick={() => setShowDetailedModal(true)}
+                className="px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                title="Tabloyu incele"
+              >
+                İncele
+              </button>
+              <button
+                onClick={() => setLastFinishedSession(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+                title="Kapat"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* İsteğe bağlı detay modalı */}
+      <SessionSummaryModal 
+        isOpen={showDetailedModal}
+        onClose={() => setShowDetailedModal(false)}
+        session={lastFinishedSession}
+        onRestart={() => {
+          setShowDetailedModal(false);
+          setLastFinishedSession(null);
+          handleQuickReset();
+        }}
+      />
+    </div>
+  );
+}
+
+export default App;
