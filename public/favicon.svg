@@ -22,8 +22,8 @@
   <!-- Full Bleed Background -->
   <rect width="512" height="512" fill="url(#bgGrad)"/>
 
-  <!-- Stopwatch Group -->
-  <g transform="translate(0, 10)">
+  <!-- Stopwatch Group (Scaled to 78% for Android/PWA Safe Zone) -->
+  <g transform="translate(256, 256) scale(0.78) translate(-256, -260)">
     <!-- Top Crown -->
     <rect x="226" y="78" width="60" height="34" rx="8" fill="#ffffff"/>
     <rect x="210" y="64" width="92" height="18" rx="7" fill="#ffffff"/>
