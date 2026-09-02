@@ -82,6 +82,12 @@ function App() {
   useWakeLock(isRunning);
 
   const handleFinishExam = () => {
+    // Çok kısaysa (<30 sn) ve hiç ders kaydedilmediyse rapor üretme, sessizce sıfırla
+    if (elapsedSeconds < 30 && activeSession.checkpoints.length === 0) {
+      handleQuickReset();
+      return;
+    }
+
     if (activeSession && !activeSession.completedAt) {
       const completed: ExamSession = {
         ...activeSession,
@@ -90,7 +96,7 @@ function App() {
       };
       setLastFinishedSession(completed);
       finishSession(elapsedSeconds);
-      setShowDetailedModal(true);
+      // Modal otomatik açılmasın! Sadece alttaki bildirim çubuğu çıksın.
     }
     
     if (isRunning) toggleTimer(); 
@@ -188,8 +194,10 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* 3 Modlu Süre Biçimi: Sadece süre başlamadıysa görünür */}
-          {!hasStarted && (
+          {/* 3 Modlu Süre Biçimi: Sadece süre başlamadıysa görünür (animasyonlu) */}
+          <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
+            hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
+          }`}>
             <button
               type="button"
               onClick={() => {
@@ -199,7 +207,7 @@ function App() {
                   return 'hh:mm:ss';
                 });
               }}
-              className="text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center gap-1"
+              className="text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center gap-1 whitespace-nowrap"
               title="Biçimi değiştir: Saat:Dk:Sn / Dk:Sn / Sadece Dk"
             >
               <span>
@@ -208,7 +216,7 @@ function App() {
                 {timeFormat === 'm_only' && 'Sadece Dk'}
               </span>
             </button>
-          )}
+          </div>
 
           {/* Tema Değiştirici */}
           <Button
@@ -229,9 +237,13 @@ function App() {
         {/* Timer Section */}
         <div className="flex flex-col items-center justify-center pt-2 md:pt-6 pb-2">
           
-          {/* Mode Switch Tabs (Sadece süre başlamadıysa görünür) */}
-          {!hasStarted && (
-            <div className="flex items-center p-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs mb-2 text-xs font-semibold">
+          {/* Mode Switch Tabs (Sadece süre başlamadıysa görünür - animasyonlu) */}
+          <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center justify-center ${
+            hasStarted 
+              ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mb-0' 
+              : 'max-h-16 opacity-100 translate-y-0 mb-2'
+          }`}>
+            <div className="flex items-center p-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs text-xs font-semibold">
               <button
                 onClick={() => handleChangeMode('countdown')}
                 className={`px-4 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer ${
@@ -254,7 +266,7 @@ function App() {
                 Kronometre
               </button>
             </div>
-          )}
+          </div>
 
           {/* Huge Timer Display with Direct Inline Editing (Dakika & Saniye) */}
           <TimerDisplay 
@@ -266,9 +278,13 @@ function App() {
             onDurationChange={handleSelectCountdownDuration}
           />
 
-          {/* Countdown Quick Presets */}
-          {timerMode === 'countdown' && !hasStarted && (
-            <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-md px-4 mt-1 mb-3 animate-in fade-in duration-200">
+          {/* Countdown Quick Presets (Animasyonlu) */}
+          <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center justify-center ${
+            timerMode === 'countdown' && !hasStarted
+              ? 'max-h-24 opacity-100 translate-y-0 mt-1 mb-3'
+              : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mt-0 mb-0'
+          }`}>
+            <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-md px-4">
               {PRESET_DURATIONS.map((preset) => (
                 <button
                   key={preset.minutes}
@@ -283,7 +299,7 @@ function App() {
                 </button>
               ))}
             </div>
-          )}
+          </div>
 
           {/* Controls right next to the timer */}
           <div className="mt-1 w-full max-w-sm px-4 transition-all duration-300">
@@ -316,11 +332,13 @@ function App() {
                 hasStarted={hasStarted}
               />
            </div>
-           {!hasStarted && (
-             <div className="text-center pb-6 text-slate-500 dark:text-zinc-400 font-medium text-xs">
+           <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+             hasStarted ? 'max-h-0 opacity-0 pb-0' : 'max-h-12 opacity-100 pb-6'
+           }`}>
+             <div className="text-center text-slate-500 dark:text-zinc-400 font-medium text-xs">
                {timerMode === 'countdown' ? 'Süreyi belirleyip Play tuşuna basın.' : 'Başlamak için Play tuşuna basın.'}
              </div>
-           )}
+           </div>
         </div>
       </main>
 

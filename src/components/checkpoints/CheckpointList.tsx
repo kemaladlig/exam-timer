@@ -53,7 +53,7 @@ export function CheckpointList({
       
       {/* 1. Sınav Başlamadan Önceki Görünüm (Sınav ve Ders Seçimi) */}
       {!hasStarted ? (
-        <div className="space-y-3">
+        <div className="space-y-3 animate-in fade-in duration-300">
           {/* Hızlı Sınav Seçici Segment */}
           <div className="flex flex-col gap-1.5">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-zinc-500 px-1">
@@ -154,7 +154,7 @@ export function CheckpointList({
         </div>
       ) : (
         /* 2. Sınav Başladıktan Sonraki Görünüm (Süre Akarken) */
-        <div className="space-y-3">
+        <div className="space-y-3 animate-in fade-in duration-300">
           {/* Süreyi Not Al & Geri Al Butonları */}
           <div className="flex gap-2">
             <button 
