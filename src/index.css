@@ -7,8 +7,32 @@
   }
 }
 
-html, body, #root {
+html {
+  background-color: #f8fafc;
+  color-scheme: light;
+}
+
+html.dark {
+  background-color: #09090b;
+  color-scheme: dark;
+}
+
+body {
+  background-color: #f8fafc;
+  color: #0f172a;
   min-height: 100%;
   display: flex;
   flex-direction: column;
+}
+
+html.dark body {
+  background-color: #09090b;
+  color: #f4f4f5;
+}
+
+#root {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }

@@ -14,7 +14,7 @@ export default defineConfig({
         short_name: 'Sınav Saati',
         description: 'Sınav ve denemeler için odaklanma kronometresi',
         theme_color: '#f8fafc',
-        background_color: '#ffffff',
+        background_color: '#f8fafc',
         display: 'standalone',
         icons: [
           {

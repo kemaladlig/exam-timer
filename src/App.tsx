@@ -33,7 +33,13 @@ function App() {
 
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   const { canInstall, installApp, showIOSModal, setShowIOSModal } = usePWAInstall();
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') return true;
+    if (saved === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  });
   
   // Varsayılan format 'hh:mm:ss' (Saat : Dk : Sn)
   const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('hh:mm:ss');
@@ -51,19 +57,30 @@ function App() {
   const [timerMode, setTimerMode] = useState<TimerMode>('countdown');
   const [countdownTotalSeconds, setCountdownTotalSeconds] = useState<number>(130 * 60);
 
-
-
   useEffect(() => {
     const themeColor = isDarkMode ? '#09090b' : '#f8fafc';
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
 
-    // Mobil telefonlarda bildirim ve durum çubuğu rengini temayla anında eşitle
+    // Mobil telefonlarda durum çubuğu rengini hem iOS hem Android için anında güncelle
     const metaTags = document.querySelectorAll('meta[name="theme-color"]');
     metaTags.forEach(tag => tag.setAttribute('content', themeColor));
+
+    // Chromium / Android cihazlarda durum çubuğu yeniden çizimini tetiklemek için dinamik etiket ekle
+    const dynamicId = 'theme-color-dynamic-override';
+    const oldDynamic = document.getElementById(dynamicId);
+    if (oldDynamic) oldDynamic.remove();
+    
+    const freshMeta = document.createElement('meta');
+    freshMeta.id = dynamicId;
+    freshMeta.name = 'theme-color';
+    freshMeta.content = themeColor;
+    document.head.appendChild(freshMeta);
   }, [isDarkMode]);
 
   const initialSeconds = timerMode === 'countdown' ? countdownTotalSeconds : 0;
@@ -170,7 +187,7 @@ function App() {
     <div className="min-h-screen flex-1 flex flex-col bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 font-sans relative transition-colors duration-200">
       
       {/* Top Navbar */}
-      <header className="px-5 py-3.5 flex justify-between items-center absolute top-0 left-0 w-full z-20">
+      <header className="px-5 py-3.5 pt-[calc(0.875rem+env(safe-area-inset-top,0px))] flex justify-between items-center w-full z-20 sticky top-0 bg-slate-50/95 dark:bg-zinc-950/95 backdrop-blur-sm transition-colors duration-200">
         <div className="font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
             <Timer size={16} />
@@ -243,7 +260,7 @@ function App() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto z-10 pt-14">
+      <main className="flex-1 flex flex-col overflow-y-auto z-10">
         
         {/* Timer Section */}
         <div className="flex flex-col items-center justify-center pt-2 md:pt-6 pb-2">
