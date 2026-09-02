@@ -6,7 +6,7 @@ import { SessionSummaryModal } from './components/stats/SessionSummaryModal';
 import { useExamSession, useTimer, useFullscreen, useWakeLock, usePWAInstall } from './hooks';
 import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession } from './types';
 import { EXAM_PRESETS } from './constants/presets';
-import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer, Download, Smartphone } from 'lucide-react';
+import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer, Download, Smartphone, CheckCircle2 } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { formatDurationHuman } from './utils';
 
@@ -372,39 +372,42 @@ function App() {
 
       {/* Engellemeyen Zarif Seans Özeti Bildirimi */}
       {lastFinishedSession && (
-        <div className="fixed bottom-4 left-4 right-4 max-w-lg mx-auto z-40 animate-in slide-in-from-bottom-5 duration-300">
-          <div className="p-3.5 rounded-2xl shadow-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex items-center justify-between gap-3 text-slate-900 dark:text-white">
-            <div className="min-w-0 flex-1">
-              <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <span>✓ Seans Tamamlandı</span>
+        <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] left-4 right-4 max-w-xl mx-auto z-40 animate-in slide-in-from-bottom-5 duration-300">
+          <div className="p-3.5 sm:p-4 rounded-2xl shadow-2xl border border-slate-200 dark:border-zinc-800 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md flex items-center justify-between gap-3 text-slate-900 dark:text-white">
+            <div className="min-w-0 flex-1 pl-1">
+              <div className="text-xs sm:text-sm font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
+                <CheckCircle2 size={16} className="shrink-0" />
+                <span>Seans Tamamlandı</span>
               </div>
-              <div className="text-xs font-mono tabular-nums text-slate-600 dark:text-zinc-400 font-semibold truncate">
-                {formatDurationHuman(lastFinishedSession.totalElapsedSeconds)} • {lastFinishedSession.checkpoints.length} kayıt
+              <div className="text-xs sm:text-sm font-mono tabular-nums text-slate-600 dark:text-zinc-400 font-semibold truncate mt-0.5">
+                {formatDurationHuman(lastFinishedSession.totalElapsedSeconds)} • {lastFinishedSession.checkpoints.length} ders
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <button
                 onClick={() => handleDirectDownloadReport(lastFinishedSession)}
-                className="px-3 py-1.5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                className="h-10 px-3.5 sm:px-4 rounded-xl bg-blue-600 text-white text-xs sm:text-sm font-bold hover:bg-blue-700 active:scale-95 transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
                 title="Raporu indir"
               >
-                <FileDown size={14} />
-                İndir
+                <FileDown size={17} />
+                <span>İndir</span>
               </button>
               <button
                 onClick={() => setShowDetailedModal(true)}
-                className="px-2.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+                className="h-10 px-3.5 sm:px-4 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 hover:bg-slate-100 dark:hover:bg-zinc-700 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-xs"
                 title="Tabloyu incele"
               >
-                İncele
+                <Eye size={17} />
+                <span>İncele</span>
               </button>
               <button
                 onClick={() => setLastFinishedSession(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:hover:bg-zinc-700 text-slate-500 hover:text-slate-900 dark:text-zinc-400 dark:hover:text-white flex items-center justify-center active:scale-95 transition-all cursor-pointer"
                 title="Kapat"
+                aria-label="Kapat"
               >
-                <X size={16} />
+                <X size={20} />
               </button>
             </div>
           </div>
