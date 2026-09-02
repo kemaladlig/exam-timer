@@ -45,3 +45,11 @@ src/
 3. **High Contrast & Eye-Friendly Aesthetics:** Accessible contrast ratios for study sessions in both daylight (light mode) and late-night (dark mode) environments without eye strain.
 4. **Resilient UX:** Undo support (`undoLastCheckpoint`, individual removal) for accidental clicks, manual time adjustments, and seamless keyboard/touch controls.
 5. **PWA First:** Installable on iOS/Android home screens without URL bars or browser chrome.
+6. **Smooth & Native Transitions:** Heavy animation libraries (like Framer Motion) are avoided to maintain zero-cost performance. Instead, native CSS transitions, Tailwind `animate-in` utilities, and logical layout persistence are used (e.g., keeping completed session state on screen until the user explicitly starts a new exam).
+
+---
+
+## 🚀 Future Roadmap & Planned Features
+- **Subtle Audio/Visual Alerts:** Non-intrusive notifications for critical time thresholds (e.g., "15 minutes remaining", "5 minutes remaining").
+- **Time Per Question (Soru Başına Süre):** Advanced statistics in the summary modal to calculate and display the average time spent per question per section.
+- **Social Sharing:** Ability to export the final session summary as a beautiful image or text block for easy sharing on social media or study groups.

@@ -8,7 +8,8 @@ interface TimerControlsProps {
   onFinishSession: () => void;
   onResetTimer: () => void;
   onToggleFullscreen: () => void;
-  hasStarted: boolean; 
+  hasStarted: boolean;
+  isFinished: boolean;
 }
 
 export function TimerControls({
@@ -18,8 +19,24 @@ export function TimerControls({
   onFinishSession,
   onResetTimer,
   onToggleFullscreen,
-  hasStarted
+  hasStarted,
+  isFinished
 }: TimerControlsProps) {
+  if (isFinished) {
+    return (
+      <div className="flex items-center justify-center gap-3 w-full animate-in fade-in zoom-in duration-300">
+        <Button
+          variant="primary"
+          onClick={onResetTimer}
+          className="rounded-2xl px-6 py-4 flex items-center justify-center text-white bg-slate-900 hover:bg-slate-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-white shadow-xl transition-transform active:scale-95 font-bold"
+        >
+          <RotateCcw size={20} className="mr-2" />
+          Yeni Sınav Başlat
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="flex items-center justify-center gap-3 w-full">
       

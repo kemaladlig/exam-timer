@@ -26,7 +26,8 @@ function App() {
     addGenericCheckpoint,
     undoLastCheckpoint,
     removeCheckpoint,
-    resetSessionCheckpoints
+    resetSessionCheckpoints,
+    finishSession
   } = useExamSession();
 
   const { isFullscreen, toggleFullscreen } = useFullscreen();
@@ -81,19 +82,18 @@ function App() {
   useWakeLock(isRunning);
 
   const handleFinishExam = () => {
-    if (activeSession) {
+    if (activeSession && !activeSession.completedAt) {
       const completed: ExamSession = {
         ...activeSession,
         totalElapsedSeconds: elapsedSeconds,
         completedAt: Date.now(),
       };
       setLastFinishedSession(completed);
+      finishSession(elapsedSeconds);
       setShowDetailedModal(true);
     }
     
     if (isRunning) toggleTimer(); 
-    resetTimer();
-    resetSessionCheckpoints();
   };
 
   const handleQuickReset = () => {
@@ -286,7 +286,7 @@ function App() {
           )}
 
           {/* Controls right next to the timer */}
-          <div className="mt-1 w-full max-w-sm px-4">
+          <div className="mt-1 w-full max-w-sm px-4 transition-all duration-300">
              <TimerControls 
                 isRunning={isRunning}
                 isFullscreen={isFullscreen}
@@ -295,6 +295,7 @@ function App() {
                 onResetTimer={handleQuickReset}
                 onToggleFullscreen={toggleFullscreen}
                 hasStarted={hasStarted}
+                isFinished={!!activeSession.completedAt}
               />
           </div>
         </div>
