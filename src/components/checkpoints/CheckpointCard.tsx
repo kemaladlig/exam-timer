@@ -5,6 +5,7 @@ import { formatSeconds } from '../../utils';
 interface CheckpointCardProps {
   section: SectionConfig;
   checkpoint?: CheckpointRecord;
+  hasStarted?: boolean;
   onComplete: (sectionId: string, sectionName: string, questionCount?: number) => void;
   onRemove?: (sectionId: string) => void;
   onUndo?: (checkpointId: string) => void;
@@ -13,24 +14,26 @@ interface CheckpointCardProps {
 export function CheckpointCard({
   section,
   checkpoint,
+  hasStarted = false,
   onComplete,
   onRemove,
   onUndo
 }: CheckpointCardProps) {
   const isCompleted = !!checkpoint;
 
+  // 1. Tamamlanmış Ders Kartı
   if (isCompleted) {
     return (
-      <div className="py-2.5 px-3.5 rounded-xl border border-slate-200/80 dark:border-zinc-800 bg-white/70 dark:bg-zinc-900/70 flex items-center justify-between shadow-xs transition-all">
-        <div className="flex items-center gap-2 min-w-0">
-          <CheckCircle2 size={16} className="text-emerald-500 shrink-0" />
-          <span className="font-semibold text-xs text-slate-700 dark:text-zinc-300 truncate">
+      <div className="py-2.5 px-3 rounded-xl border border-emerald-200/60 dark:border-emerald-950/50 bg-emerald-50/40 dark:bg-emerald-950/20 flex items-center justify-between shadow-xs transition-all">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <CheckCircle2 size={15} className="text-emerald-600 dark:text-emerald-400 shrink-0" />
+          <span className="font-semibold text-xs text-slate-800 dark:text-zinc-200 truncate">
             {section.name}
           </span>
         </div>
         
-        <div className="flex items-center gap-1.5 shrink-0 ml-1">
-          <span className="font-mono tabular-nums text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/40 px-2 py-0.5 rounded-md">
+        <div className="flex items-center gap-1.5 shrink-0 ml-1.5">
+          <span className="font-mono tabular-nums text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100/80 dark:bg-emerald-900/50 px-2 py-0.5 rounded-md">
             {formatSeconds(checkpoint.deltaSeconds)}
           </span>
           {onUndo && (
@@ -40,7 +43,7 @@ export function CheckpointCard({
               className="p-1 rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
               title="Tamamlamayı geri al"
             >
-              <RotateCcw size={13} />
+              <RotateCcw size={12} />
             </button>
           )}
         </div>
@@ -48,17 +51,51 @@ export function CheckpointCard({
     );
   }
 
+  // 2. Sınav Henüz Başlamadıysa (Ders Seçim / Hazırlık Modu)
+  if (!hasStarted) {
+    return (
+      <div className="py-2.5 px-3 rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs flex items-center justify-between transition-all">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />
+          <span className="font-medium text-xs sm:text-sm text-slate-800 dark:text-zinc-200 truncate">
+            {section.name}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5 shrink-0 ml-2">
+          {section.questionCount ? (
+            <span className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md">
+              {section.questionCount} Soru
+            </span>
+          ) : null}
+
+          {onRemove && (
+            <button
+              type="button"
+              onClick={() => onRemove(section.id)}
+              className="p-1 text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors rounded-md"
+              title="Bu dersi çıkar"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Sınav Aktifken (Süre Akarken Bitir Butonlu Kart)
   return (
-    <div className="rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-blue-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all flex items-center justify-between group active:scale-[0.99]">
+    <div className="rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-sm transition-all flex items-center justify-between group active:scale-[0.98]">
       <button 
         type="button"
         onClick={() => onComplete(section.id, section.name, section.questionCount)}
-        className="flex-1 text-left py-3 px-3.5 flex items-center justify-between min-w-0 outline-none"
+        className="flex-1 text-left py-3 px-3 flex items-center justify-between min-w-0 outline-none cursor-pointer"
       >
-        <span className="font-semibold text-sm text-slate-800 dark:text-zinc-200 truncate">
+        <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-zinc-200 truncate">
           {section.name}
         </span>
-        <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white px-2.5 py-1 rounded-lg shrink-0 ml-2 transition-colors">
+        <span className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white px-2.5 py-1 rounded-lg shrink-0 ml-1.5 transition-colors">
           Bitir
         </span>
       </button>
@@ -73,7 +110,7 @@ export function CheckpointCard({
           className="p-2 mr-1 text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors rounded-lg shrink-0"
           title="Dersi Sil"
         >
-          <X size={14} />
+          <X size={13} />
         </button>
       )}
     </div>

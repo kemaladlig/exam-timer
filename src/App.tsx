@@ -6,7 +6,7 @@ import { SessionSummaryModal } from './components/stats/SessionSummaryModal';
 import { useExamSession, useTimer, useFullscreen, useWakeLock } from './hooks';
 import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession } from './types';
 import { EXAM_PRESETS } from './constants/presets';
-import { Moon, Sun, ArrowDownUp, FileDown, X, Eye } from 'lucide-react';
+import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { formatDurationHuman } from './utils';
 
@@ -144,10 +144,18 @@ function App() {
   const handleResetSections = (type: 'kpss' | 'tyt' | 'clear') => {
     if (type === 'kpss') {
       const kpss = EXAM_PRESETS.find(p => p.id === 'kpss-lisans');
-      if (kpss) setSections(kpss.sections);
+      if (kpss) {
+        setSections(kpss.sections);
+        setCountdownTotalSeconds(kpss.totalDurationSeconds);
+        resetTimer();
+      }
     } else if (type === 'tyt') {
       const tyt = EXAM_PRESETS.find(p => p.id === 'yks-tyt');
-      if (tyt) setSections(tyt.sections);
+      if (tyt) {
+        setSections(tyt.sections);
+        setCountdownTotalSeconds(tyt.totalDurationSeconds);
+        resetTimer();
+      }
     } else {
       setSections([]);
     }
@@ -177,8 +185,11 @@ function App() {
       
       {/* Top Navbar */}
       <header className="px-5 py-3.5 flex justify-between items-center absolute top-0 left-0 w-full z-20">
-        <div className="font-extrabold text-base tracking-tight flex items-center gap-2">
-          <span className="text-slate-900 dark:text-white">Sınav Sayacı</span>
+        <div className="font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
+            <Timer size={16} />
+          </div>
+          <span className="text-slate-900 dark:text-white font-bold">Sınav Kronometresi</span>
           {lastFinishedSession && (
             <button
               onClick={() => setShowDetailedModal(true)}
