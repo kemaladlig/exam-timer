@@ -5,7 +5,7 @@ import { formatSeconds } from '../../utils';
 interface CheckpointCardProps {
   section: SectionConfig;
   checkpoint?: CheckpointRecord;
-  onComplete: (sectionId: string, sectionName: string) => void;
+  onComplete: (sectionId: string, sectionName: string, questionCount?: number) => void;
   onRemove?: (sectionId: string) => void;
   onUndo?: (checkpointId: string) => void;
 }
@@ -52,7 +52,7 @@ export function CheckpointCard({
     <div className="rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-blue-300 dark:hover:border-zinc-700 hover:shadow-sm transition-all flex items-center justify-between group active:scale-[0.99]">
       <button 
         type="button"
-        onClick={() => onComplete(section.id, section.name)}
+        onClick={() => onComplete(section.id, section.name, section.questionCount)}
         className="flex-1 text-left py-3 px-3.5 flex items-center justify-between min-w-0 outline-none"
       >
         <span className="font-semibold text-sm text-slate-800 dark:text-zinc-200 truncate">

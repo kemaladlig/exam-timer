@@ -8,7 +8,7 @@ import { formatSeconds } from '../../utils';
 interface CheckpointListProps {
   sections: SectionConfig[];
   checkpoints: CheckpointRecord[];
-  onCompleteSection: (sectionId: string, sectionName: string) => void;
+  onCompleteSection: (sectionId: string, sectionName: string, questionCount?: number) => void;
   onGenericCheckpoint: (customName?: string) => void;
   onUndoLastCheckpoint: () => void;
   onRemoveCheckpoint: (checkpointId: string) => void;

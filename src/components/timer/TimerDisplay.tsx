@@ -144,6 +144,17 @@ export function TimerDisplay({
           {formatSeconds(displayedSeconds, format)}
         </div>
       )}
+
+      {/* Subtle warnings underneath */}
+      {!isEditing && (isWarning || isCritical) && (
+        <div className="mt-1 animate-pulse">
+           {isCritical ? (
+             <span className="text-xs font-semibold text-red-500/80 bg-red-500/10 px-2.5 py-0.5 rounded-full tracking-wider">SON 5 DAKİKA</span>
+           ) : (
+             <span className="text-xs font-semibold text-amber-500/80 bg-amber-500/10 px-2.5 py-0.5 rounded-full tracking-wider">SON 15 DAKİKA</span>
+           )}
+        </div>
+      )}
     </div>
   );
 }

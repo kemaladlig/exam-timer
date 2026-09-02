@@ -4,6 +4,7 @@ export type TimeDisplayFormat = 'mm:ss' | 'hh:mm:ss' | 'm_only';
 export interface SectionConfig {
   id: string;
   name: string;
+  questionCount?: number;
 }
 
 export interface ExamTemplate {

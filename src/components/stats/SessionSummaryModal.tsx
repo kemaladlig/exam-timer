@@ -3,7 +3,8 @@ import type { ExamSession } from '../../types';
 import { formatDurationHuman } from '../../utils';
 import { TimeBreakdownTable } from './TimeBreakdownTable';
 import { Button } from '../ui/Button';
-import { FileDown, RefreshCcw } from 'lucide-react';
+import { FileDown, RefreshCcw, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
 
 interface SessionSummaryModalProps {
   isOpen: boolean;
@@ -13,21 +14,42 @@ interface SessionSummaryModalProps {
 }
 
 export function SessionSummaryModal({ isOpen, onClose, session, onRestart }: SessionSummaryModalProps) {
+  const [copied, setCopied] = useState(false);
+  
   if (!session) return null;
 
-  const handleDownloadReport = () => {
+  const generateReportText = () => {
     const header = `Sınav Raporu: ${session.examTitle}\nTarih: ${new Date(session.startedAt).toLocaleString()}\nToplam Süre: ${formatDurationHuman(session.totalElapsedSeconds)}\n\n`;
     const details = session.checkpoints.map((cp, idx) => {
-      return `#${idx + 1} - ${cp.sectionName}: ${cp.deltaSeconds}sn`;
+      let speed = '';
+      if (cp.questionCount && cp.questionCount > 0) {
+         speed = ` (${(cp.deltaSeconds / cp.questionCount).toFixed(1)} sn/soru)`;
+      }
+      return `#${idx + 1} - ${cp.sectionName}: ${formatDurationHuman(cp.deltaSeconds)}${speed}`;
     }).join('\n');
-    
-    const blob = new Blob([header + details], { type: 'text/plain' });
+    return header + details;
+  };
+
+  const handleDownloadReport = () => {
+    const text = generateReportText();
+    const blob = new Blob([text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `Sinav_Raporu_${session.examTitle.replace(/\s+/g, '_')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleCopySummary = async () => {
+    const text = generateReportText();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
   };
 
   return (
@@ -56,15 +78,23 @@ export function SessionSummaryModal({ isOpen, onClose, session, onRestart }: Ses
         <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200 dark:border-zinc-800">
           <Button 
             variant="secondary" 
+            onClick={handleCopySummary} 
+            className="flex-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700"
+          >
+            {copied ? <Check className="mr-2 text-emerald-500" size={18} /> : <Copy className="mr-2" size={18} />}
+            {copied ? 'Kopyalandı!' : 'Özeti Kopyala'}
+          </Button>
+          <Button 
+            variant="secondary" 
             onClick={handleDownloadReport} 
             className="flex-1 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-200 border-slate-200 dark:border-zinc-700"
           >
             <FileDown className="mr-2" size={18} />
-            Raporu İndir (.txt)
+            İndir (.txt)
           </Button>
           <Button variant="primary" onClick={onRestart} className="flex-1 rounded-xl shadow-sm">
             <RefreshCcw className="mr-2" size={18} />
-            Yeni Seans Başlat
+            Yeni Seans
           </Button>
         </div>
       </div>

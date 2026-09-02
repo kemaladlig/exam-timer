@@ -24,6 +24,7 @@ export function TimeBreakdownTable({ session }: TimeBreakdownTableProps) {
             <th className="px-4 py-3 font-semibold">Sıra</th>
             <th className="px-4 py-3 font-semibold">Bölüm / Tur</th>
             <th className="px-4 py-3 font-semibold">Harcanan Süre</th>
+            <th className="px-4 py-3 font-semibold text-center">Hız</th>
             <th className="px-4 py-3 font-semibold text-right">% Toplam</th>
           </tr>
         </thead>
@@ -33,11 +34,25 @@ export function TimeBreakdownTable({ session }: TimeBreakdownTableProps) {
               ? ((cp.deltaSeconds / session.totalElapsedSeconds) * 100).toFixed(1)
               : '0.0';
 
+            const timePerQuestion = cp.questionCount && cp.questionCount > 0 
+              ? (cp.deltaSeconds / cp.questionCount).toFixed(1)
+              : null;
+
             return (
               <tr key={cp.id} className="hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
                 <td className="px-4 py-3 text-slate-400 dark:text-zinc-500 font-mono text-xs">#{idx + 1}</td>
-                <td className="px-4 py-3 font-medium text-slate-800 dark:text-zinc-200">{cp.sectionName}</td>
-                <td className="px-4 py-3 font-mono tabular-nums font-semibold text-primary">{formatSeconds(cp.deltaSeconds)}</td>
+                <td className="px-4 py-3 font-medium text-slate-800 dark:text-zinc-200">
+                  {cp.sectionName}
+                  {cp.questionCount && (
+                    <span className="ml-2 text-[10px] bg-slate-100 dark:bg-zinc-800 text-slate-500 dark:text-zinc-400 px-1.5 py-0.5 rounded">
+                      {cp.questionCount} Soru
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3 font-mono tabular-nums font-semibold text-blue-600 dark:text-blue-400">{formatSeconds(cp.deltaSeconds)}</td>
+                <td className="px-4 py-3 text-center font-mono tabular-nums text-xs text-slate-500 dark:text-zinc-400">
+                  {timePerQuestion ? `${timePerQuestion} sn/soru` : '-'}
+                </td>
                 <td className="px-4 py-3 text-right font-mono tabular-nums text-slate-500 dark:text-zinc-400">{percent}%</td>
               </tr>
             );

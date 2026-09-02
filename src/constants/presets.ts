@@ -8,11 +8,11 @@ export const EXAM_PRESETS: ExamTemplate[] = [
     defaultMode: 'countdown',
     totalDurationSeconds: 130 * 60, // 130 minutes
     sections: [
-      { id: 'kpss-tr', name: 'Türkçe' },
-      { id: 'kpss-math', name: 'Matematik' },
-      { id: 'kpss-hist', name: 'Tarih' },
-      { id: 'kpss-geo', name: 'Coğrafya' },
-      { id: 'kpss-cit', name: 'Vatandaşlık & Güncel' },
+      { id: 'kpss-tr', name: 'Türkçe', questionCount: 30 },
+      { id: 'kpss-math', name: 'Matematik', questionCount: 30 },
+      { id: 'kpss-hist', name: 'Tarih', questionCount: 27 },
+      { id: 'kpss-geo', name: 'Coğrafya', questionCount: 18 },
+      { id: 'kpss-cit', name: 'Vatandaşlık & Güncel', questionCount: 15 },
     ],
   },
   {
@@ -22,11 +22,11 @@ export const EXAM_PRESETS: ExamTemplate[] = [
     defaultMode: 'countdown',
     totalDurationSeconds: 120 * 60, // 120 minutes
     sections: [
-      { id: 'kpss-std-tr', name: 'Türkçe' },
-      { id: 'kpss-std-math', name: 'Matematik' },
-      { id: 'kpss-std-hist', name: 'Tarih' },
-      { id: 'kpss-std-geo', name: 'Coğrafya' },
-      { id: 'kpss-std-cit', name: 'Vatandaşlık' },
+      { id: 'kpss-std-tr', name: 'Türkçe', questionCount: 30 },
+      { id: 'kpss-std-math', name: 'Matematik', questionCount: 30 },
+      { id: 'kpss-std-hist', name: 'Tarih', questionCount: 27 },
+      { id: 'kpss-std-geo', name: 'Coğrafya', questionCount: 18 },
+      { id: 'kpss-std-cit', name: 'Vatandaşlık', questionCount: 15 },
     ],
   },
   {
@@ -36,10 +36,10 @@ export const EXAM_PRESETS: ExamTemplate[] = [
     defaultMode: 'countdown',
     totalDurationSeconds: 165 * 60, // 165 minutes
     sections: [
-      { id: 'tyt-tr', name: 'Türkçe' },
-      { id: 'tyt-sos', name: 'Sosyal Bilimler' },
-      { id: 'tyt-mat', name: 'Temel Matematik' },
-      { id: 'tyt-fen', name: 'Fen Bilimleri' },
+      { id: 'tyt-tr', name: 'Türkçe', questionCount: 40 },
+      { id: 'tyt-sos', name: 'Sosyal Bilimler', questionCount: 20 },
+      { id: 'tyt-mat', name: 'Temel Matematik', questionCount: 40 },
+      { id: 'tyt-fen', name: 'Fen Bilimleri', questionCount: 20 },
     ],
   },
 ];

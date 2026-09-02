@@ -19,7 +19,7 @@ export function useExamSession() {
     setActiveSession(newSession);
   }, []);
 
-  const addCheckpoint = useCallback((sectionId: string, sectionName: string, elapsedSeconds: number) => {
+  const addCheckpoint = useCallback((sectionId: string, sectionName: string, elapsedSeconds: number, questionCount?: number) => {
     setActiveSession((prev) => {
       if (!prev) return prev;
 
@@ -33,6 +33,7 @@ export function useExamSession() {
         id: crypto.randomUUID(),
         sectionId,
         sectionName,
+        questionCount,
         timestamp: Date.now(),
         elapsedSecondsAtCheckpoint: elapsedSeconds,
         deltaSeconds,

@@ -68,6 +68,42 @@ export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
   const remainingSeconds = Math.max(0, initialSeconds - elapsedSeconds);
   const displayedSeconds = mode === 'countdown' ? remainingSeconds : elapsedSeconds;
 
+  // Subtle audio alerts for 15m and 5m remaining
+  const playedAlertsRef = useRef<Set<number>>(new Set());
+
+  useEffect(() => {
+    if (mode === 'countdown' && isRunning && initialSeconds > 0) {
+      const remaining = initialSeconds - elapsedSeconds;
+      
+      // 900s = 15m, 300s = 5m
+      if ((remaining === 900 || remaining === 300) && !playedAlertsRef.current.has(remaining)) {
+        playedAlertsRef.current.add(remaining);
+        
+        try {
+          const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          
+          osc.type = 'sine';
+          // 15m = lower pitch (440Hz), 5m = slightly higher pitch (523Hz)
+          osc.frequency.setValueAtTime(remaining === 300 ? 523.25 : 440, ctx.currentTime);
+          
+          gain.gain.setValueAtTime(0, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.1, ctx.currentTime + 0.1);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+          
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 1.5);
+        } catch (e) {
+          console.error("Audio playback failed for timer alert", e);
+        }
+      }
+    }
+  }, [elapsedSeconds, isRunning, mode, initialSeconds]);
+
   return {
     elapsedSeconds,
     remainingSeconds,

@@ -2,6 +2,7 @@ export interface CheckpointRecord {
   id: string;
   sectionId: string;
   sectionName: string;
+  questionCount?: number;
   timestamp: number; // Unix timestamp when checkpoint was recorded
   elapsedSecondsAtCheckpoint: number; // Total exam time elapsed when this checkpoint was recorded
   deltaSeconds: number; // Time spent since last checkpoint

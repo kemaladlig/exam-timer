@@ -307,7 +307,7 @@ function App() {
              <CheckpointList 
                 sections={sections} 
                 checkpoints={activeSession.checkpoints}
-                onCompleteSection={(id, name) => addCheckpoint(id, name, elapsedSeconds)}
+                onCompleteSection={(id, name, qc) => addCheckpoint(id, name, elapsedSeconds, qc)}
                 onGenericCheckpoint={(name) => addGenericCheckpoint(elapsedSeconds, name)}
                 onUndoLastCheckpoint={undoLastCheckpoint}
                 onRemoveCheckpoint={removeCheckpoint}
