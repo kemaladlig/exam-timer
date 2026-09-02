@@ -189,7 +189,7 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Uygulamayı Yükle Butonu (Sadece süre başlamadıysa ve henüz kurulu değilse görünür, animasyonlu) */}
+          {/* Uygulamayı Yükle Butonu (Sadece ikon, animasyonlu) */}
           {canInstall && (
             <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
               hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
@@ -197,11 +197,10 @@ function App() {
               <button
                 type="button"
                 onClick={installApp}
-                className="text-xs px-2.5 py-1.5 rounded-lg font-semibold border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
-                title="Sınav Kronometresini telefonuna uygulama olarak yükle"
+                className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
+                title="Uygulamayı Cihazına Yükle"
               >
-                <Download size={13} />
-                <span>Yükle</span>
+                <Download size={16} className="text-blue-600 dark:text-blue-400" />
               </button>
             </div>
           )}
