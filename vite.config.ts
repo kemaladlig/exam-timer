@@ -11,7 +11,7 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'app-icon.png'],
       manifest: {
         name: 'Sınav Kronometresi',
-        short_name: 'Kronometre',
+        short_name: 'Sınav Saati',
         description: 'Sınav ve denemeler için odaklanma kronometresi',
         theme_color: '#f8fafc',
         background_color: '#ffffff',
