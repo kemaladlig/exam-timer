@@ -3,10 +3,10 @@ import { TimerDisplay } from './components/timer/TimerDisplay';
 import { TimerControls } from './components/timer/TimerControls';
 import { CheckpointList } from './components/checkpoints/CheckpointList';
 import { SessionSummaryModal } from './components/stats/SessionSummaryModal';
-import { useExamSession, useTimer, useFullscreen, useWakeLock } from './hooks';
+import { useExamSession, useTimer, useFullscreen, useWakeLock, usePWAInstall } from './hooks';
 import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession } from './types';
 import { EXAM_PRESETS } from './constants/presets';
-import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer } from 'lucide-react';
+import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer, Download, Smartphone } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { formatDurationHuman } from './utils';
 
@@ -32,6 +32,7 @@ function App() {
   } = useExamSession();
 
   const { isFullscreen, toggleFullscreen } = useFullscreen();
+  const { canInstall, installApp, showIOSModal, setShowIOSModal } = usePWAInstall();
   const [isDarkMode, setIsDarkMode] = useState(false);
   
   // Varsayılan format 'hh:mm:ss' (Saat : Dk : Sn)
@@ -188,6 +189,23 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Uygulamayı Yükle Butonu (Sadece süre başlamadıysa ve henüz kurulu değilse görünür, animasyonlu) */}
+          {canInstall && (
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
+              hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
+            }`}>
+              <button
+                type="button"
+                onClick={installApp}
+                className="text-xs px-2.5 py-1.5 rounded-lg font-semibold border border-blue-200 dark:border-blue-900/60 bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
+                title="Sınav Kronometresini telefonuna uygulama olarak yükle"
+              >
+                <Download size={13} />
+                <span>Yükle</span>
+              </button>
+            </div>
+          )}
+
           {/* 3 Modlu Süre Biçimi: Sadece süre başlamadıysa görünür (animasyonlu) */}
           <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
             hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
@@ -388,6 +406,51 @@ function App() {
           handleQuickReset();
         }}
       />
+
+      {/* iOS Safari İçin Şık Ana Ekrana Ekle Rehber Modalı */}
+      {showIOSModal && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+          <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-5 rounded-2xl max-w-sm w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 font-bold text-sm text-slate-800 dark:text-zinc-100">
+                <Smartphone size={18} className="text-blue-600 dark:text-blue-400" />
+                <span>Ana Ekrana Ekle</span>
+              </div>
+              <button 
+                onClick={() => setShowIOSModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 cursor-pointer"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed">
+              Safari tarayıcısında Sınav Kronometresi'ni adres çubuğu olmadan, tam ekran bir uygulama gibi kullanmak için:
+            </p>
+
+            <div className="p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-100 dark:border-zinc-800 text-xs text-slate-700 dark:text-zinc-300 space-y-2.5">
+              <div className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 font-bold flex items-center justify-center text-[10px] shrink-0">1</span>
+                <span>Alttaki <strong>Paylaş (Share)</strong> simgesine dokun.</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/60 text-blue-600 dark:text-blue-300 font-bold flex items-center justify-center text-[10px] shrink-0">2</span>
+                <span>Açılan menüden <strong>"Ana Ekrana Ekle"</strong>yi seç.</span>
+              </div>
+            </div>
+
+            <Button 
+              fullWidth 
+              size="sm" 
+              variant="primary" 
+              onClick={() => setShowIOSModal(false)}
+              className="rounded-xl font-semibold cursor-pointer"
+            >
+              Anladım
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
