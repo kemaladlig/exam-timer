@@ -12,7 +12,7 @@ export const EXAM_PRESETS: ExamTemplate[] = [
       { id: 'kpss-math', name: 'Matematik' },
       { id: 'kpss-hist', name: 'Tarih' },
       { id: 'kpss-geo', name: 'Coğrafya' },
-      { id: 'kpss-cit', name: 'Vatandaşlık & Güncel' },
+      { id: 'kpss-cit', name: 'Vatandaşlık' },
     ],
   },
   {
