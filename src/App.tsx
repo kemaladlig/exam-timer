@@ -32,8 +32,8 @@ function App() {
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   const [isDarkMode, setIsDarkMode] = useState(false);
   
-  // Varsayılan format 'mm:ss' (Dakika : Saniye)
-  const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('mm:ss');
+  // Varsayılan format 'hh:mm:ss' (Saat : Dk : Sn)
+  const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('hh:mm:ss');
   
   // Non-blocking report state
   const [lastFinishedSession, setLastFinishedSession] = useState<ExamSession | null>(null);
@@ -44,8 +44,8 @@ function App() {
     return EXAM_PRESETS.find(p => p.id === 'kpss-lisans')?.sections || [];
   });
 
-  // Mode state: stopwatch or countdown
-  const [timerMode, setTimerMode] = useState<TimerMode>('stopwatch');
+  // Mode state: countdown varsayılan
+  const [timerMode, setTimerMode] = useState<TimerMode>('countdown');
   const [countdownTotalSeconds, setCountdownTotalSeconds] = useState<number>(130 * 60);
 
 
@@ -188,25 +188,27 @@ function App() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* 3 Modlu Süre Biçimi: Dk:Sn -> Saat:Dk:Sn -> Sadece Dk */}
-          <button
-            type="button"
-            onClick={() => {
-              setTimeFormat(prev => {
-                if (prev === 'mm:ss') return 'hh:mm:ss';
-                if (prev === 'hh:mm:ss') return 'm_only';
-                return 'mm:ss';
-              });
-            }}
-            className="text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center gap-1"
-            title="Biçimi değiştir: Dk:Sn / Saat:Dk:Sn / Sadece Dk"
-          >
-            <span>
-              {timeFormat === 'mm:ss' && 'Dk : Sn'}
-              {timeFormat === 'hh:mm:ss' && 'Saat : Dk : Sn'}
-              {timeFormat === 'm_only' && 'Sadece Dk'}
-            </span>
-          </button>
+          {/* 3 Modlu Süre Biçimi: Sadece süre başlamadıysa görünür */}
+          {!hasStarted && (
+            <button
+              type="button"
+              onClick={() => {
+                setTimeFormat(prev => {
+                  if (prev === 'hh:mm:ss') return 'mm:ss';
+                  if (prev === 'mm:ss') return 'm_only';
+                  return 'hh:mm:ss';
+                });
+              }}
+              className="text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center gap-1"
+              title="Biçimi değiştir: Saat:Dk:Sn / Dk:Sn / Sadece Dk"
+            >
+              <span>
+                {timeFormat === 'hh:mm:ss' && 'Saat : Dk : Sn'}
+                {timeFormat === 'mm:ss' && 'Dk : Sn'}
+                {timeFormat === 'm_only' && 'Sadece Dk'}
+              </span>
+            </button>
+          )}
 
           {/* Tema Değiştirici */}
           <Button

@@ -11,7 +11,7 @@ export function useExamSession() {
       examTitle: preset.name,
       startedAt: Date.now(),
       completedAt: null,
-      mode: 'stopwatch',
+      mode: 'countdown',
       totalAllocatedSeconds: preset.totalDurationSeconds,
       totalElapsedSeconds: 0,
       checkpoints: [],
