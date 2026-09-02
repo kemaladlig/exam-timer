@@ -246,7 +246,6 @@ export function CheckpointList({
                     section={section}
                     hasStarted={true}
                     onComplete={onCompleteSection}
-                    onRemove={onRemoveSection}
                   />
                 ))}
               </div>

@@ -63,17 +63,11 @@ export function CheckpointCard({
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0 ml-2">
-          {section.questionCount ? (
-            <span className="text-[10px] sm:text-xs font-medium text-slate-500 dark:text-zinc-400 bg-slate-100 dark:bg-zinc-800/80 px-2 py-0.5 rounded-md">
-              {section.questionCount} Soru
-            </span>
-          ) : null}
-
           {onRemove && (
             <button
               type="button"
               onClick={() => onRemove(section.id)}
-              className="p-1 text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors rounded-md"
+              className="p-1 text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors rounded-md cursor-pointer"
               title="Bu dersi çıkar"
             >
               <X size={13} />
@@ -84,35 +78,19 @@ export function CheckpointCard({
     );
   }
 
-  // 3. Sınav Aktifken (Süre Akarken Bitir Butonlu Kart)
+  // 3. Sınav Aktifken (Süre Akarken Tamamı Tıklanabilir Bitir Kartı - Yanlışlıkla silmeyi önlemek için X yok)
   return (
-    <div className="rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-sm transition-all flex items-center justify-between group active:scale-[0.98]">
-      <button 
-        type="button"
-        onClick={() => onComplete(section.id, section.name, section.questionCount)}
-        className="flex-1 text-left py-3 px-3 flex items-center justify-between min-w-0 outline-none cursor-pointer"
-      >
-        <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-zinc-200 truncate">
-          {section.name}
-        </span>
-        <span className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white px-2.5 py-1 rounded-lg shrink-0 ml-1.5 transition-colors">
-          Bitir
-        </span>
-      </button>
-
-      {onRemove && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRemove(section.id);
-          }}
-          className="p-2 mr-1 text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors rounded-lg shrink-0"
-          title="Dersi Sil"
-        >
-          <X size={13} />
-        </button>
-      )}
-    </div>
+    <button 
+      type="button"
+      onClick={() => onComplete(section.id, section.name, section.questionCount)}
+      className="rounded-xl border border-slate-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-sm transition-all flex items-center justify-between group active:scale-[0.98] py-3 px-3.5 w-full text-left outline-none cursor-pointer"
+    >
+      <span className="font-semibold text-xs sm:text-sm text-slate-800 dark:text-zinc-200 truncate">
+        {section.name}
+      </span>
+      <span className="text-[11px] sm:text-xs font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 group-hover:bg-blue-600 group-hover:text-white dark:group-hover:bg-blue-600 dark:group-hover:text-white px-2.5 py-1 rounded-lg shrink-0 ml-1.5 transition-colors">
+        Bitir
+      </span>
+    </button>
   );
 }
