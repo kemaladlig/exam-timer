@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BookmarkPlus, RotateCcw, Plus, ChevronDown, ChevronUp, Clock, X, Pin, CheckCircle2, BookmarkCheck, Layers, Sparkles } from 'lucide-react';
 import type { SectionConfig, CheckpointRecord, CustomPreset } from '../../types';
 import { EXAM_PRESETS } from '../../constants/presets';
@@ -46,6 +46,38 @@ export function CheckpointList({
   });
   const [isSavingGroup, setIsSavingGroup] = useState(false);
   const [groupName, setGroupName] = useState('');
+
+  // Toast bildirimi ve buton anlık geri bildirim state'leri
+  const [toast, setToast] = useState<{ message: string; type: 'note' | 'section' } | null>(null);
+  const [isNotedFeedback, setIsNotedFeedback] = useState(false);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => {
+      setToast(null);
+    }, 3000);
+    return () => clearTimeout(timer);
+  }, [toast]);
+
+  const handleGenericCheckpointClick = () => {
+    onGenericCheckpoint();
+    setIsNotedFeedback(true);
+    setToast({
+      message: `Tur #${checkpoints.length + 1} süresi not alındı`,
+      type: 'note',
+    });
+    setTimeout(() => {
+      setIsNotedFeedback(false);
+    }, 1500);
+  };
+
+  const handleCompleteSectionClick = (sectionId: string, sectionName: string, questionCount?: number) => {
+    onCompleteSection(sectionId, sectionName, questionCount);
+    setToast({
+      message: `${sectionName} tamamlandı`,
+      type: 'section',
+    });
+  };
 
   const hasCheckpoints = checkpoints.length > 0;
   const allRecordedCheckpoints = [...checkpoints].reverse();
@@ -283,11 +315,24 @@ export function CheckpointList({
           <div className="flex gap-2">
             <button 
               type="button"
-              onClick={() => onGenericCheckpoint()}
-              className="flex-1 rounded-xl py-3 px-4 font-semibold border border-slate-200/90 dark:border-zinc-800 bg-white hover:bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 shadow-xs hover:border-slate-300 dark:hover:border-zinc-700 transition-all text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer"
+              onClick={handleGenericCheckpointClick}
+              className={`flex-1 rounded-xl py-3 px-4 font-semibold border transition-all text-xs sm:text-sm flex items-center justify-center gap-2 active:scale-[0.99] cursor-pointer ${
+                isNotedFeedback
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-500 scale-[1.01]'
+                  : 'border-slate-200/90 dark:border-zinc-800 bg-white hover:bg-slate-50 text-slate-800 dark:bg-zinc-900 dark:hover:bg-zinc-800 dark:text-zinc-200 shadow-xs hover:border-slate-300 dark:hover:border-zinc-700'
+              }`}
             >
-              <BookmarkPlus size={16} className="text-blue-600 dark:text-blue-400" />
-              <span>Süreyi Not Al</span>
+              {isNotedFeedback ? (
+                <>
+                  <CheckCircle2 size={16} className="text-emerald-600 dark:text-emerald-400 animate-in zoom-in-50 duration-150" />
+                  <span>Süre Not Alındı!</span>
+                </>
+              ) : (
+                <>
+                  <BookmarkPlus size={16} className="text-blue-600 dark:text-blue-400" />
+                  <span>Süreyi Not Al</span>
+                </>
+              )}
             </button>
             
             {hasCheckpoints && (
@@ -369,7 +414,7 @@ export function CheckpointList({
                     key={section.id}
                     section={section}
                     hasStarted={true}
-                    onComplete={onCompleteSection}
+                    onComplete={handleCompleteSectionClick}
                   />
                 ))}
               </div>
@@ -403,6 +448,30 @@ export function CheckpointList({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Şık Floating Toast Bildirimi */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200 pointer-events-auto max-w-[92vw]">
+          <div className="px-4 py-2.5 rounded-2xl bg-slate-900/95 dark:bg-zinc-100/95 text-white dark:text-zinc-900 text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2.5 border border-white/10 dark:border-zinc-300/30">
+            {toast.type === 'note' ? (
+              <BookmarkCheck size={16} className="text-blue-400 dark:text-blue-600 shrink-0" />
+            ) : (
+              <CheckCircle2 size={16} className="text-emerald-400 dark:text-emerald-600 shrink-0" />
+            )}
+            <span className="truncate">{toast.message}</span>
+            <button
+              type="button"
+              onClick={() => {
+                onUndoLastCheckpoint();
+                setToast(null);
+              }}
+              className="ml-2 pl-2.5 border-l border-white/20 dark:border-zinc-400/40 text-blue-400 dark:text-blue-600 hover:underline cursor-pointer text-xs font-semibold shrink-0"
+            >
+              Geri Al
+            </button>
+          </div>
         </div>
       )}
 
