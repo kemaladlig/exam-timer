@@ -23,10 +23,8 @@ export function TimerDisplay({
 }: TimerDisplayProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [inputMinutes, setInputMinutes] = useState('0');
-  const [inputSeconds, setInputSeconds] = useState('00');
   
   const minInputRef = useRef<HTMLInputElement>(null);
-  const secInputRef = useRef<HTMLInputElement>(null);
 
   const isWarning = mode === 'countdown' && remainingSeconds <= 15 * 60 && remainingSeconds > 5 * 60;
   const isCritical = mode === 'countdown' && remainingSeconds <= 5 * 60;
@@ -34,17 +32,14 @@ export function TimerDisplay({
   useEffect(() => {
     if (!isEditing) {
       const mins = Math.floor(displayedSeconds / 60);
-      const secs = displayedSeconds % 60;
       setInputMinutes(mins.toString());
-      setInputSeconds(String(secs).padStart(2, '0'));
     }
   }, [displayedSeconds, isEditing]);
 
   const handleCommit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const mins = parseInt(inputMinutes, 10) || 0;
-    const secs = parseInt(inputSeconds, 10) || 0;
-    const total = mins * 60 + secs;
+    const total = mins * 60;
 
     if (total > 0 && onDurationChange) {
       onDurationChange(total);
@@ -61,16 +56,16 @@ export function TimerDisplay({
   };
 
   const colorClass = isCritical 
-    ? "text-red-500 drop-shadow-[0_0_25px_rgba(239,68,68,0.4)]" 
+    ? "text-slate-900 dark:text-white drop-shadow-[0_0_25px_rgba(239,68,68,0.3)]" 
     : isWarning 
-      ? "text-amber-500 dark:text-amber-400 drop-shadow-[0_0_20px_rgba(245,158,11,0.3)]" 
+      ? "text-slate-900 dark:text-white drop-shadow-[0_0_20px_rgba(245,158,11,0.2)]" 
       : "text-slate-900 dark:text-white";
 
   return (
     <div className="flex flex-col items-center justify-center w-full py-2">
       {isEditable && isEditing ? (
         <form onSubmit={handleCommit} className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-150">
-          {/* Dakika ve Saniye Giriş Alanı */}
+          {/* Dakika Giriş Alanı */}
           <div className="flex items-center justify-center font-mono tabular-nums font-bold tracking-tighter leading-none text-slate-900 dark:text-white">
             <div className="flex flex-col items-center">
               <input
@@ -87,25 +82,6 @@ export function TimerDisplay({
               />
               <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mt-1">
                 Dakika
-              </span>
-            </div>
-
-            <span className="text-[4rem] md:text-[7rem] pb-5 opacity-40 select-none mx-1">:</span>
-
-            <div className="flex flex-col items-center">
-              <input
-                ref={secInputRef}
-                type="number"
-                min="0"
-                max="59"
-                value={inputSeconds}
-                onChange={(e) => setInputSeconds(e.target.value)}
-                onBlur={() => handleCommit()}
-                onKeyDown={handleKeyDown}
-                className="text-[5rem] md:text-[8rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-32 md:w-48 leading-none"
-              />
-              <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mt-1">
-                Saniye
               </span>
             </div>
           </div>
