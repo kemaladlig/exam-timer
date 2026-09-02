@@ -22,13 +22,11 @@ const PRESET_DURATIONS = [
 function App() {
   const { 
     activeSession, 
-    startSession, 
     addCheckpoint, 
     addGenericCheckpoint,
     undoLastCheckpoint,
     removeCheckpoint,
-    finishSession,
-    clearSession 
+    resetSessionCheckpoints
   } = useExamSession();
 
   const { isFullscreen, toggleFullscreen } = useFullscreen();
@@ -50,18 +48,7 @@ function App() {
   const [timerMode, setTimerMode] = useState<TimerMode>('stopwatch');
   const [countdownTotalSeconds, setCountdownTotalSeconds] = useState<number>(130 * 60);
 
-  // Auto-start session on mount if it doesn't exist
-  useEffect(() => {
-    if (!activeSession) {
-      const preset = EXAM_PRESETS.find(p => p.id === 'kpss-lisans') || EXAM_PRESETS[0];
-      startSession({ 
-        ...preset, 
-        sections,
-        defaultMode: timerMode,
-        totalDurationSeconds: timerMode === 'countdown' ? countdownTotalSeconds : 0
-      });
-    }
-  }, [activeSession, startSession, timerMode, countdownTotalSeconds, sections]);
+
 
   useEffect(() => {
     if (isDarkMode) {
@@ -101,19 +88,18 @@ function App() {
         completedAt: Date.now(),
       };
       setLastFinishedSession(completed);
-      finishSession(elapsedSeconds);
+      setShowDetailedModal(true);
     }
     
     if (isRunning) toggleTimer(); 
     resetTimer();
-    clearSession();
-    if (isFullscreen) toggleFullscreen(); 
+    resetSessionCheckpoints();
   };
 
   const handleQuickReset = () => {
     if (isRunning) toggleTimer();
     resetTimer();
-    clearSession();
+    resetSessionCheckpoints();
   };
 
   const handleChangeMode = (newMode: TimerMode) => {
@@ -176,7 +162,6 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
-  if (!activeSession) return null;
 
   const hasStarted = elapsedSeconds > 0 || isRunning;
 

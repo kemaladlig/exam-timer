@@ -1,8 +1,22 @@
 import { useState, useCallback } from 'react';
 import type { ExamTemplate, ExamSession, CheckpointRecord } from '../types';
+import { EXAM_PRESETS } from '../constants/presets';
 
 export function useExamSession() {
-  const [activeSession, setActiveSession] = useState<ExamSession | null>(null);
+  const [activeSession, setActiveSession] = useState<ExamSession>(() => {
+    const preset = EXAM_PRESETS[0];
+    return {
+      id: crypto.randomUUID(),
+      examTemplateId: preset.id,
+      examTitle: preset.name,
+      startedAt: Date.now(),
+      completedAt: null,
+      mode: 'stopwatch',
+      totalAllocatedSeconds: preset.totalDurationSeconds,
+      totalElapsedSeconds: 0,
+      checkpoints: [],
+    };
+  });
 
   const startSession = useCallback((template: ExamTemplate) => {
     const newSession: ExamSession = {
@@ -107,8 +121,30 @@ export function useExamSession() {
     });
   }, []);
 
+  const resetSessionCheckpoints = useCallback(() => {
+    setActiveSession((prev) => ({
+      ...prev,
+      id: crypto.randomUUID(),
+      startedAt: Date.now(),
+      completedAt: null,
+      totalElapsedSeconds: 0,
+      checkpoints: [],
+    }));
+  }, []);
+
   const clearSession = useCallback(() => {
-    setActiveSession(null);
+    const preset = EXAM_PRESETS[0];
+    setActiveSession({
+      id: crypto.randomUUID(),
+      examTemplateId: preset.id,
+      examTitle: preset.name,
+      startedAt: Date.now(),
+      completedAt: null,
+      mode: 'stopwatch',
+      totalAllocatedSeconds: preset.totalDurationSeconds,
+      totalElapsedSeconds: 0,
+      checkpoints: [],
+    });
   }, []);
 
   return {
@@ -119,6 +155,7 @@ export function useExamSession() {
     undoLastCheckpoint,
     removeCheckpoint,
     finishSession,
+    resetSessionCheckpoints,
     clearSession,
   };
 }
