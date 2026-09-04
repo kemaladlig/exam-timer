@@ -90,7 +90,7 @@ export function TimerDisplay({
         >
           <div 
             className={cn(
-              "text-[5.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none transition-all duration-300 group-hover:scale-[1.02]",
+              "text-[5.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none transition-transform duration-200 group-hover:scale-[1.02]",
               colorClass
             )}
           >
@@ -104,7 +104,7 @@ export function TimerDisplay({
       ) : (
         <div 
           className={cn(
-            "text-[5.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none transition-all duration-300",
+            "text-[5.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none",
             colorClass
           )}
         >

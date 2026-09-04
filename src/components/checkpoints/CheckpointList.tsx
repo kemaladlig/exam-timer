@@ -239,7 +239,7 @@ export function CheckpointList({
                     key={preset.id}
                     type="button"
                     onClick={() => onApplyPreset(preset.sections, preset.totalDurationSeconds)}
-                    className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-xs hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
+                    className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-transform active:scale-95 bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-100 shadow-xs hover:text-blue-600 dark:hover:text-blue-400 cursor-pointer"
                     title={preset.name}
                   >
                     <span>{shortLabel}</span>
@@ -250,7 +250,7 @@ export function CheckpointList({
               <button
                 type="button"
                 onClick={() => onApplyPreset([])}
-                className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-all bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 shadow-xs hover:text-red-500 dark:hover:text-red-400 cursor-pointer ml-auto"
+                className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-transform active:scale-95 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 shadow-xs hover:text-red-500 dark:hover:text-red-400 cursor-pointer ml-auto"
                 title="Ders listesini boşalt"
               >
                 <Layers size={13} />

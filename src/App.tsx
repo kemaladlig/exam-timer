@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { TimerDisplay } from './components/timer/TimerDisplay';
 import { TimerControls } from './components/timer/TimerControls';
 import { CheckpointList } from './components/checkpoints/CheckpointList';
@@ -47,7 +48,16 @@ function App() {
     // Modern View Transitions API (Sıfır senkron kayması, ekran görüntüsü üzerinden tek kare crossfade)
     if (typeof document !== 'undefined' && 'startViewTransition' in document) {
       (document as any).startViewTransition(() => {
-        setIsDarkMode(nextTheme);
+        flushSync(() => {
+          setIsDarkMode(nextTheme);
+          if (nextTheme) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+          }
+        });
       });
     } else {
       setIsDarkMode(nextTheme);
@@ -341,7 +351,7 @@ function App() {
                 <button
                   key={preset.minutes}
                   onClick={() => handleSelectCountdownDuration(preset.minutes * 60)}
-                  className={`text-xs px-3 py-1.5 rounded-full font-semibold border transition-all cursor-pointer ${
+                  className={`text-xs px-3 py-1.5 rounded-full font-semibold border transition-transform active:scale-95 cursor-pointer ${
                     countdownTotalSeconds === preset.minutes * 60
                       ? 'bg-blue-50 border-blue-600 text-blue-700 dark:bg-blue-950 dark:border-blue-500 dark:text-blue-300 shadow-xs'
                       : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800'
