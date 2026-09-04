@@ -41,6 +41,18 @@ function App() {
     if (saved === 'light') return false;
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
+
+  const handleToggleTheme = () => {
+    const nextTheme = !isDarkMode;
+    // Modern View Transitions API (Sıfır senkron kayması, ekran görüntüsü üzerinden tek kare crossfade)
+    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
+      (document as any).startViewTransition(() => {
+        setIsDarkMode(nextTheme);
+      });
+    } else {
+      setIsDarkMode(nextTheme);
+    }
+  };
   
   // Varsayılan format 'hh:mm:ss' (Saat : Dk : Sn)
   const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('hh:mm:ss');
@@ -250,7 +262,7 @@ function App() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => setIsDarkMode(!isDarkMode)}
+            onClick={handleToggleTheme}
             title="Temayı Değiştir"
             className="rounded-full w-9 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 cursor-pointer"
           >

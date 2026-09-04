@@ -102,9 +102,17 @@
   animation: toastSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Pürüzsüz ve Eşzamanlı Tema Geçişi */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 html {
   background-color: #f8fafc;
   color-scheme: light;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 html.dark {
@@ -118,6 +126,7 @@ body {
   min-height: 100%;
   display: flex;
   flex-direction: column;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 html.dark body {
