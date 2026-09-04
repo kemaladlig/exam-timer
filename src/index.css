@@ -7,6 +7,101 @@
   }
 }
 
+/* Süzülerek Gelme (Slide Down & Fade In) */
+@keyframes slideDownFade {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Yumuşakça Çıkma (Slide Out & Shrink) */
+@keyframes slideOutFade {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    max-height: 48px;
+  }
+  30% {
+    opacity: 0.5;
+    transform: translateX(8px) scale(0.98);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(18px) scale(0.92);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+}
+
+/* Kart Belirme (Pop In) */
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.015);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Kartın Geri Alınması / Silinmesi (Pop Out) */
+@keyframes popOut {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+}
+
+/* Toast Bildirimi */
+@keyframes toastSlideUp {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+}
+
+.animate-slide-down {
+  animation: slideDownFade 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-out {
+  animation: slideOutFade 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+.animate-pop-in {
+  animation: popIn 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pop-out {
+  animation: popOut 0.32s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+}
+
+.animate-toast-in {
+  animation: toastSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 html {
   background-color: #f8fafc;
   color-scheme: light;

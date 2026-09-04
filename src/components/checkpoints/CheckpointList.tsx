@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { BookmarkPlus, RotateCcw, Plus, ChevronDown, ChevronUp, Clock, X, Pin, CheckCircle2, BookmarkCheck, Layers, Sparkles } from 'lucide-react';
 import type { SectionConfig, CheckpointRecord, CustomPreset } from '../../types';
 import { EXAM_PRESETS } from '../../constants/presets';
@@ -50,6 +50,55 @@ export function CheckpointList({
   // Toast bildirimi ve buton anlık geri bildirim state'leri
   const [toast, setToast] = useState<{ message: string; type: 'note' | 'section' } | null>(null);
   const [isNotedFeedback, setIsNotedFeedback] = useState(false);
+
+  // Çıkış (silme/geri alma) animasyonundaki elemanların ID listesi
+  const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
+
+  // Yalnızca yeni eklenen kaydın ID'si (silme sırasında 1. sıraya kayan eski kayıtların tekrar oynamasını engeller)
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  const prevCheckpointsCountRef = useRef(checkpoints.length);
+
+  useEffect(() => {
+    // Sadece eleman sayısı arttığında (yeni kayıt geldiğinde) animasyon tetikle
+    if (checkpoints.length > prevCheckpointsCountRef.current) {
+      const latest = checkpoints[checkpoints.length - 1];
+      if (latest) {
+        setJustAddedId(latest.id);
+        const timer = setTimeout(() => {
+          setJustAddedId(null);
+        }, 500);
+        prevCheckpointsCountRef.current = checkpoints.length;
+        return () => clearTimeout(timer);
+      }
+    }
+    prevCheckpointsCountRef.current = checkpoints.length;
+  }, [checkpoints]);
+
+  const handleAnimatedRemoveCheckpoint = (checkpointId: string) => {
+    setExitingIds(prev => new Set(prev).add(checkpointId));
+    setTimeout(() => {
+      onRemoveCheckpoint(checkpointId);
+      setExitingIds(prev => {
+        const next = new Set(prev);
+        next.delete(checkpointId);
+        return next;
+      });
+    }, 360);
+  };
+
+  const handleAnimatedUndoLast = () => {
+    if (checkpoints.length === 0) return;
+    const lastCp = checkpoints[checkpoints.length - 1];
+    setExitingIds(prev => new Set(prev).add(lastCp.id));
+    setTimeout(() => {
+      onUndoLastCheckpoint();
+      setExitingIds(prev => {
+        const next = new Set(prev);
+        next.delete(lastCp.id);
+        return next;
+      });
+    }, 360);
+  };
 
   useEffect(() => {
     if (!toast) return;
@@ -338,7 +387,7 @@ export function CheckpointList({
             {hasCheckpoints && (
               <button 
                 type="button"
-                onClick={onUndoLastCheckpoint}
+                onClick={handleAnimatedUndoLast}
                 className="rounded-xl px-3.5 py-3 text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50/60 hover:bg-red-100/60 dark:bg-red-950/30 dark:hover:bg-red-950/50 dark:text-red-400 border border-red-200/70 dark:border-red-900/40 transition-colors flex items-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
                 title="Son kaydı geri al"
               >
@@ -365,38 +414,51 @@ export function CheckpointList({
 
               {isHistoryOpen && (
                 <div className="px-3 py-1 space-y-0.5 divide-y divide-slate-100 dark:divide-zinc-800/60 max-h-44 overflow-y-auto">
-                  {allRecordedCheckpoints.map((cp) => (
-                    <div key={cp.id} className="py-2 flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 min-w-0">
-                        {cp.isGenericLap ? (
-                          <Pin size={13} className="text-blue-500 shrink-0" />
-                        ) : (
-                          <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
-                        )}
-                        <span className="font-semibold text-slate-800 dark:text-zinc-200 truncate text-xs">
-                          {cp.sectionName}
-                        </span>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 font-mono tabular-nums shrink-0 ml-2">
-                        <span className="text-slate-400 dark:text-zinc-500 text-[11px]">
-                          {formatSeconds(cp.elapsedSecondsAtCheckpoint)}
-                        </span>
-                        <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded">
-                          +{formatSeconds(cp.deltaSeconds)}
-                        </span>
+                  {allRecordedCheckpoints.map((cp) => {
+                    const isExiting = exitingIds.has(cp.id);
+                    const isJustAdded = cp.id === justAddedId;
+                    return (
+                      <div 
+                        key={cp.id} 
+                        className={`py-2 flex items-center justify-between text-xs transition-all duration-300 ${
+                          isExiting 
+                            ? 'animate-slide-out' 
+                            : isJustAdded 
+                            ? 'animate-slide-down' 
+                            : ''
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          {cp.isGenericLap ? (
+                            <Pin size={13} className="text-blue-500 shrink-0" />
+                          ) : (
+                            <CheckCircle2 size={13} className="text-emerald-500 shrink-0" />
+                          )}
+                          <span className="font-semibold text-slate-800 dark:text-zinc-200 truncate text-xs">
+                            {cp.sectionName}
+                          </span>
+                        </div>
                         
-                        <button
-                          type="button"
-                          onClick={() => onRemoveCheckpoint(cp.id)}
-                          className="p-1 rounded text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors cursor-pointer"
-                          title="Bu kaydı geri al / sil"
-                        >
-                          <X size={13} />
-                        </button>
+                        <div className="flex items-center gap-2 font-mono tabular-nums shrink-0 ml-2">
+                          <span className="text-slate-400 dark:text-zinc-500 text-[11px]">
+                            {formatSeconds(cp.elapsedSecondsAtCheckpoint)}
+                          </span>
+                          <span className="font-semibold text-blue-600 dark:text-blue-400 text-xs bg-blue-50 dark:bg-blue-950/50 px-2 py-0.5 rounded">
+                            +{formatSeconds(cp.deltaSeconds)}
+                          </span>
+                          
+                          <button
+                            type="button"
+                            onClick={() => handleAnimatedRemoveCheckpoint(cp.id)}
+                            className="p-1 rounded text-slate-300 hover:text-red-500 dark:text-zinc-600 dark:hover:text-red-400 transition-colors cursor-pointer active:scale-90"
+                            title="Bu kaydı geri al / sil"
+                          >
+                            <X size={13} />
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -434,14 +496,16 @@ export function CheckpointList({
               <div className="grid grid-cols-2 gap-2">
                 {completedCheckpoints.map((cp) => {
                   const sec = sections.find(s => s.id === cp.sectionId) || { id: cp.sectionId, name: cp.sectionName };
+                  const isExiting = exitingIds.has(cp.id);
                   return (
                     <CheckpointCard
                       key={cp.id}
                       section={sec}
                       checkpoint={cp}
                       hasStarted={true}
+                      isExiting={isExiting}
                       onComplete={() => {}}
-                      onUndo={onRemoveCheckpoint}
+                      onUndo={handleAnimatedRemoveCheckpoint}
                     />
                   );
                 })}
@@ -453,7 +517,7 @@ export function CheckpointList({
 
       {/* Şık Floating Toast Bildirimi */}
       {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-bottom-3 duration-200 pointer-events-auto max-w-[92vw]">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-toast-in pointer-events-auto max-w-[92vw]">
           <div className="px-4 py-2.5 rounded-2xl bg-slate-900/95 dark:bg-zinc-100/95 text-white dark:text-zinc-900 text-xs font-bold shadow-2xl backdrop-blur-md flex items-center gap-2.5 border border-white/10 dark:border-zinc-300/30">
             {toast.type === 'note' ? (
               <BookmarkCheck size={16} className="text-blue-400 dark:text-blue-600 shrink-0" />
@@ -464,7 +528,7 @@ export function CheckpointList({
             <button
               type="button"
               onClick={() => {
-                onUndoLastCheckpoint();
+                handleAnimatedUndoLast();
                 setToast(null);
               }}
               className="ml-2 pl-2.5 border-l border-white/20 dark:border-zinc-400/40 text-blue-400 dark:text-blue-600 hover:underline cursor-pointer text-xs font-semibold shrink-0"

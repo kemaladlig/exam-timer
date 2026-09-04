@@ -3,10 +3,11 @@ import { TimerDisplay } from './components/timer/TimerDisplay';
 import { TimerControls } from './components/timer/TimerControls';
 import { CheckpointList } from './components/checkpoints/CheckpointList';
 import { SessionSummaryModal } from './components/stats/SessionSummaryModal';
+import { SettingsModal } from './components/settings/SettingsModal';
 import { useExamSession, useTimer, useFullscreen, useWakeLock, usePWAInstall } from './hooks';
 import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession } from './types';
 import { EXAM_PRESETS } from './constants/presets';
-import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer, Download, Smartphone, CheckCircle2 } from 'lucide-react';
+import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer, Download, Smartphone, CheckCircle2, Settings } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { formatDurationHuman } from './utils';
 
@@ -44,6 +45,19 @@ function App() {
   // Varsayılan format 'hh:mm:ss' (Saat : Dk : Sn)
   const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('hh:mm:ss');
   
+  // Ayarlar Modalı ve İlerleme Çubuğu Görünürlük Durumu
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [showProgressBar, setShowProgressBar] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    const saved = localStorage.getItem('exam_show_progress_bar');
+    return saved !== null ? saved === 'true' : true;
+  });
+
+  const handleToggleProgressBar = (show: boolean) => {
+    setShowProgressBar(show);
+    localStorage.setItem('exam_show_progress_bar', String(show));
+  };
+
   // Non-blocking report state
   const [lastFinishedSession, setLastFinishedSession] = useState<ExamSession | null>(null);
   const [showDetailedModal, setShowDetailedModal] = useState(false);
@@ -222,29 +236,15 @@ function App() {
             </div>
           )}
 
-          {/* 3 Modlu Süre Biçimi: Sadece süre başlamadıysa görünür (animasyonlu) */}
-          <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
-            hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
-          }`}>
-            <button
-              type="button"
-              onClick={() => {
-                setTimeFormat(prev => {
-                  if (prev === 'hh:mm:ss') return 'mm:ss';
-                  if (prev === 'mm:ss') return 'm_only';
-                  return 'hh:mm:ss';
-                });
-              }}
-              className="text-xs px-2.5 py-1.5 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center gap-1 whitespace-nowrap"
-              title="Biçimi değiştir: Saat:Dk:Sn / Dk:Sn / Sadece Dk"
-            >
-              <span>
-                {timeFormat === 'hh:mm:ss' && 'Saat : Dk : Sn'}
-                {timeFormat === 'mm:ss' && 'Dk : Sn'}
-                {timeFormat === 'm_only' && 'Sadece Dk'}
-              </span>
-            </button>
-          </div>
+          {/* Görünüm ve Ayarlar Butonu */}
+          <button
+            type="button"
+            onClick={() => setIsSettingsOpen(true)}
+            className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
+            title="Görünüm ve Ayarlar"
+          >
+            <Settings size={17} className="text-slate-600 dark:text-zinc-300" />
+          </button>
 
           {/* Tema Değiştirici */}
           <Button
@@ -258,6 +258,18 @@ function App() {
           </Button>
         </div>
       </header>
+
+      {/* Top Sticky Minimalist Zen Ambient Line */}
+      {showProgressBar && timerMode === 'countdown' && countdownTotalSeconds > 0 && (
+        <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top,0px))] z-20 w-full h-[2px] bg-slate-200/50 dark:bg-zinc-800/60 overflow-hidden pointer-events-none">
+          <div
+            className="h-full bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.35)] transition-all duration-1000 ease-linear rounded-r-full"
+            style={{
+              width: `${Math.min(100, Math.max(0, (remainingSeconds / countdownTotalSeconds) * 100))}%`
+            }}
+          />
+        </div>
+      )}
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col overflow-y-auto z-10">
@@ -359,13 +371,6 @@ function App() {
                 onApplyPreset={handleApplyPreset}
                 hasStarted={hasStarted}
               />
-           </div>
-           <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
-             hasStarted ? 'max-h-0 opacity-0 pb-0' : 'max-h-12 opacity-100 pb-6'
-           }`}>
-             <div className="text-center text-slate-500 dark:text-zinc-400 font-medium text-xs">
-               {timerMode === 'countdown' ? 'Süreyi belirleyip Play tuşuna basın.' : 'Başlamak için Play tuşuna basın.'}
-             </div>
            </div>
         </div>
       </main>
@@ -470,6 +475,16 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Görünüm ve Ayarlar Modalı */}
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        timeFormat={timeFormat}
+        onChangeTimeFormat={setTimeFormat}
+        showProgressBar={showProgressBar}
+        onToggleProgressBar={handleToggleProgressBar}
+      />
     </div>
   );
 }
