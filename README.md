@@ -1,32 +1,56 @@
-# React + TypeScript + Vite
+# Exam Timer (Sınav / Deneme Kronometresi) ⏱️
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+YKS, TYT, AYT, KPSS, ALES ve LGS gibi merkezi sınavlara ve özel çalışma seanslarına yönelik; React 19, TypeScript, Vite ve Tailwind CSS ile geliştirilmiş modern, hafif ve PWA destekli deneme kronometresi.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## ✨ Özellikler
 
-## React Compiler
+- 🎯 **Sınav Hazır Şablonları:** TYT, AYT, KPSS, ALES ve Pomodoro gibi ön tanımlı sınav formatları ve ders/bölüm süre dağılımları.
+- ⏱️ **Gelişmiş Süre Takibi:** İleri veya geri sayım modu, anlık süre düzenleme ve format seçenekleri (ss:dd:sn, dd:sn, sadece dakika).
+- 📌 **Ders ve Bölüm Ayrımı (Checkpoints):** Sınav esnasında ders/bölüm geçişlerini kaydetme, ara süreleri (split) görme ve not ekleme.
+- ↩️ **Hata Toleransı (Undo/Geri Al):** Yanlışlıkla basılan tur/checkpoint geçişlerini geri alabilme veya tekil olarak silebilme.
+- 📱 **PWA & Ekran Uyanık Kalma (Wake Lock):** Mobil cihazlarda ana ekrana eklenebilir, sınav süresince ekranın kapanmasını otomatik olarak engeller.
+- 🌓 **Göz Dostu Tema:** Hem gündüz hem gece çalışmaları için yüksek kontrastlı aydınlık ve karanlık tema desteği.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the Oxlint configuration
+## 🛠️ Teknolojiler
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+- **Arayüz & Çekirdek:** [React 19](https://react.dev/), [TypeScript](https://www.typescriptlang.org/)
+- **Derleme Aracı:** [Vite](https://vite.dev/)
+- **Stil & Tasarım:** [Tailwind CSS v4](https://tailwindcss.com/)
+- **İkon Seti:** [Lucide React](https://lucide.dev/)
+- **PWA Desteği:** [vite-plugin-pwa](https://vite-pwa-org.github.io/)
 
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+---
+
+## 🚀 Başlangıç
+
+Projeyi yerel ortamınızda çalıştırmak için:
+
+### Gereksinimler
+- Node.js (v18 veya üzeri)
+- npm veya pnpm / bun
+
+### Kurulum
+
+```bash
+# Bağımlılıkları yükleyin
+npm install
+
+# Geliştirme sunucusunu başlatın
+npm run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+### Üretim Derlemesi (Build)
+
+```bash
+npm run build
+```
+
+---
+
+## 📄 Lisans
+
+Bu proje açık kaynaklıdır ve [MIT](LICENSE) lisansı altında sunulmaktadır.
