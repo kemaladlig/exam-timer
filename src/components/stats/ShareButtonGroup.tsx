@@ -50,45 +50,45 @@ export function ShareButtonGroup({ data, className = '' }: ShareButtonGroupProps
   };
 
   return (
-    <div className={`flex items-center gap-1.5 flex-wrap ${className}`}>
-      {/* WhatsApp Button */}
+    <div className={`flex items-center gap-1.5 ${className}`}>
+      {/* WhatsApp Icon Button */}
       <button
         type="button"
         onClick={handleWhatsApp}
-        className="h-9 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0"
+        className="w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white transition-all cursor-pointer flex items-center justify-center shadow-2xs shrink-0"
         title="WhatsApp'ta Paylaş"
+        aria-label="WhatsApp'ta Paylaş"
       >
-        <MessageCircle size={14} className="fill-white/20" />
-        <span>WhatsApp</span>
+        <MessageCircle size={16} className="fill-white/20" />
       </button>
 
-      {/* Image Card Share / Download Button */}
+      {/* Image Card Share / Download Icon Button */}
       <button
         type="button"
         onClick={handleImageShare}
         disabled={isGeneratingImage}
-        className="h-9 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-2xs shrink-0 disabled:opacity-70"
-        title="Sonuç Kartını Resim Olarak Paylaş veya İndir"
+        className="w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white transition-all cursor-pointer flex items-center justify-center shadow-2xs shrink-0 disabled:opacity-70"
+        title="Sonuç Kartını Resim Olarak Paylaş / İndir"
+        aria-label="Sonuç Kartını Resim Olarak Paylaş / İndir"
       >
         {isGeneratingImage ? (
-          <Loader2 size={14} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" />
         ) : imageSharedStatus === 'done' ? (
-          <Check size={14} className="text-white" />
+          <Check size={16} className="text-white" />
         ) : (
-          <Image size={14} />
+          <Image size={16} />
         )}
-        <span>{imageSharedStatus === 'done' ? 'Hazırlandı' : 'Kart Resmi'}</span>
       </button>
 
-      {/* Copy Text Button */}
+      {/* Copy Text Icon Button */}
       <button
         type="button"
         onClick={handleCopy}
-        className="h-9 px-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1 shrink-0"
-        title="Metin Olarak Kopyala"
+        className="w-9 h-9 rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 active:scale-95 text-slate-700 dark:text-zinc-300 transition-colors cursor-pointer flex items-center justify-center shrink-0"
+        title="Rapor Metnini Kopyala"
+        aria-label="Rapor Metnini Kopyala"
       >
-        {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
-        <span className="hidden xs:inline">{copied ? 'Kopyalandı' : 'Kopyala'}</span>
+        {copied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
       </button>
     </div>
   );

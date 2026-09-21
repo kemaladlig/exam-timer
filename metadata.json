@@ -1,6 +1,4 @@
 {
   "name": "Sınav Kronometresi",
-  "description": "Sınav ve denemeler için odaklanma kronometresi",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "description": "Sınav ve denemeler için odaklanma kronometresi"
 }

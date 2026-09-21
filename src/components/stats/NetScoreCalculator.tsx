@@ -361,7 +361,7 @@ export const NetScoreCalculator: React.FC<NetScoreCalculatorProps> = ({
                     const scoreObj = calculateKpssScore(sectionResults.gyNet, sectionResults.gkNet, 'lisans');
                     return scoreObj.score > 0 ? (
                       <span className="text-[11px] font-mono font-bold px-2 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border border-emerald-300/60 dark:border-emerald-800/60">
-                        🎯 Tahmini P3: {scoreObj.score}
+                        Tahmini P3: {scoreObj.score}
                       </span>
                     ) : null;
                   })()}

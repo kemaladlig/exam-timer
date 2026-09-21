@@ -14,7 +14,8 @@ import {
   Award, 
   GraduationCap,
   Plus,
-  Minus
+  Minus,
+  Check
 } from 'lucide-react';
 
 interface QuickNetModalProps {
@@ -200,9 +201,7 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
   const handleInputChange = (
     sectionId: string, 
     field: 'correct' | 'incorrect', 
-    val: string,
-    currentIndex: number,
-    totalItems: number
+    val: string
   ) => {
     const sanitized = val.replace(/[^0-9]/g, '');
     setCounts((prev) => ({
@@ -212,18 +211,6 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
         [field]: sanitized,
       },
     }));
-
-    // Auto-advance to next input when 2 digits are entered
-    if (sanitized.length >= 2) {
-      if (field === 'correct') {
-        inputRefs.current[`${sectionId}-incorrect`]?.focus();
-      } else if (currentIndex < totalItems - 1) {
-        const nextSec = currentSections[currentIndex + 1];
-        if (nextSec) {
-          inputRefs.current[`${nextSec.id}-correct`]?.focus();
-        }
-      }
-    }
   };
 
   // Keyboard avoidance on mobile: scroll focused input into viewport
@@ -434,19 +421,19 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
         </div>
 
         {/* Right: Stepper Inputs & Net */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {/* Doğru (D) Stepper */}
-          <div className="flex items-center bg-slate-100/90 dark:bg-zinc-950 p-0.5 rounded-lg border border-slate-200/90 dark:border-zinc-800">
+          <div className="flex items-center bg-slate-100 dark:bg-zinc-950 p-0.5 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-2xs">
             <button
               type="button"
               onClick={() => handleStep(sec.id, 'correct', -1, sec.questionCount)}
-              className="w-5 sm:w-6 h-6 sm:h-7 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 rounded hover:bg-slate-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="w-6 sm:w-7 h-7 sm:h-8 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 active:bg-slate-200 dark:active:bg-zinc-800 rounded transition-colors cursor-pointer"
               title="1 Azalt"
             >
-              <Minus size={11} />
+              <Minus size={12} />
             </button>
 
-            <div className="flex items-center px-0.5">
+            <div className="flex items-center px-1">
               <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mr-0.5">D</span>
               <input
                 ref={(el) => { inputRefs.current[`${sec.id}-correct`] = el; }}
@@ -456,39 +443,39 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
                 placeholder="0"
                 value={counts[sec.id]?.correct || ''}
                 onFocus={handleInputFocus}
-                onChange={(e) => handleInputChange(sec.id, 'correct', e.target.value, index, total)}
+                onChange={(e) => handleInputChange(sec.id, 'correct', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
                     inputRefs.current[`${sec.id}-incorrect`]?.focus();
                   }
                 }}
-                className="w-6 sm:w-7 h-6 sm:h-7 text-center font-mono font-bold text-xs sm:text-sm bg-transparent focus:outline-none text-slate-900 dark:text-white"
+                className="w-7 sm:w-8 h-7 sm:h-8 text-center font-mono font-bold text-xs sm:text-sm bg-transparent focus:outline-none text-slate-900 dark:text-white"
               />
             </div>
 
             <button
               type="button"
               onClick={() => handleStep(sec.id, 'correct', +1, sec.questionCount)}
-              className="w-5 sm:w-6 h-6 sm:h-7 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 rounded hover:bg-slate-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="w-6 sm:w-7 h-7 sm:h-8 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 active:bg-slate-200 dark:active:bg-zinc-800 rounded transition-colors cursor-pointer"
               title="1 Artır"
             >
-              <Plus size={11} />
+              <Plus size={12} />
             </button>
           </div>
 
           {/* Yanlış (Y) Stepper */}
-          <div className="flex items-center bg-slate-100/90 dark:bg-zinc-950 p-0.5 rounded-lg border border-slate-200/90 dark:border-zinc-800">
+          <div className="flex items-center bg-slate-100 dark:bg-zinc-950 p-0.5 rounded-lg border border-slate-200 dark:border-zinc-800 shadow-2xs">
             <button
               type="button"
               onClick={() => handleStep(sec.id, 'incorrect', -1, sec.questionCount)}
-              className="w-5 sm:w-6 h-6 sm:h-7 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 rounded hover:bg-slate-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="w-6 sm:w-7 h-7 sm:h-8 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 active:bg-slate-200 dark:active:bg-zinc-800 rounded transition-colors cursor-pointer"
               title="1 Azalt"
             >
-              <Minus size={11} />
+              <Minus size={12} />
             </button>
 
-            <div className="flex items-center px-0.5">
+            <div className="flex items-center px-1">
               <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 mr-0.5">Y</span>
               <input
                 ref={(el) => { inputRefs.current[`${sec.id}-incorrect`] = el; }}
@@ -498,7 +485,7 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
                 placeholder="0"
                 value={counts[sec.id]?.incorrect || ''}
                 onFocus={handleInputFocus}
-                onChange={(e) => handleInputChange(sec.id, 'incorrect', e.target.value, index, total)}
+                onChange={(e) => handleInputChange(sec.id, 'incorrect', e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     e.preventDefault();
@@ -508,22 +495,22 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
                     }
                   }
                 }}
-                className="w-6 sm:w-7 h-6 sm:h-7 text-center font-mono font-bold text-xs sm:text-sm bg-transparent focus:outline-none text-slate-900 dark:text-white"
+                className="w-7 sm:w-8 h-7 sm:h-8 text-center font-mono font-bold text-xs sm:text-sm bg-transparent focus:outline-none text-slate-900 dark:text-white"
               />
             </div>
 
             <button
               type="button"
               onClick={() => handleStep(sec.id, 'incorrect', +1, sec.questionCount)}
-              className="w-5 sm:w-6 h-6 sm:h-7 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 rounded hover:bg-slate-200/70 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+              className="w-6 sm:w-7 h-7 sm:h-8 flex items-center justify-center text-slate-400 hover:text-slate-800 dark:hover:text-zinc-200 active:bg-slate-200 dark:active:bg-zinc-800 rounded transition-colors cursor-pointer"
               title="1 Artır"
             >
-              <Plus size={11} />
+              <Plus size={12} />
             </button>
           </div>
 
           {/* Calculated Net */}
-          <div className="min-w-[34px] sm:min-w-[44px] text-right font-mono font-bold text-xs sm:text-sm shrink-0">
+          <div className="min-w-[36px] sm:min-w-[46px] text-right font-mono font-bold text-xs sm:text-sm shrink-0">
             <span className={sec.net > 0 ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400 dark:text-zinc-500'}>
               {sec.net}
             </span>
@@ -774,18 +761,25 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
         </div>
 
         {/* Bottom Action Bar: Sharing & Done */}
-        <div className="flex items-center justify-between gap-2 pt-3 pb-1 border-t border-slate-200 dark:border-zinc-800 sticky bottom-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xs flex-wrap">
+        <div className="flex items-center justify-between gap-2 pt-3 pb-1 border-t border-slate-200 dark:border-zinc-800 sticky bottom-0 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xs">
           {calculatedResults.hasAnyData ? (
             <ShareButtonGroup data={shareCardData} />
-          ) : <div />}
+          ) : (
+            <span className="text-[11px] text-slate-400 dark:text-zinc-500 font-medium">
+              Değerleri girdikçe anlık hesaplanır
+            </span>
+          )}
 
-          <Button
-            variant="primary"
-            onClick={onClose}
-            className="flex-1 sm:flex-initial sm:min-w-[120px] h-9 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 text-white shadow-xs cursor-pointer flex items-center justify-center ml-auto"
-          >
-            Tamam
-          </Button>
+          <div className="flex items-center gap-2 ml-auto">
+            <Button
+              variant="primary"
+              onClick={onClose}
+              className="h-9 px-4 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 active:scale-98 text-white shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
+            >
+              <Check size={14} />
+              <span>{hasSession && activeTab === 'session' ? 'Kaydet ve Kapat' : 'Kapat'}</span>
+            </Button>
+          </div>
         </div>
       </div>
     </Modal>

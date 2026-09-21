@@ -51,8 +51,14 @@ export function TimerDisplay({
 
   const colorClass = "text-slate-900 dark:text-white";
 
+  const timeString = formatSeconds(displayedSeconds, format);
+  // Shorter strings (e.g. 5 chars "25:00") can be even larger than 8 char strings ("01:25:00")
+  const sizeClass = timeString.length <= 5 
+    ? "text-[clamp(3.75rem,19vw,7.5rem)] sm:text-[7.5rem] md:text-[9.5rem] lg:text-[11rem]"
+    : "text-[clamp(3.25rem,15.5vw,6.5rem)] sm:text-[6.75rem] md:text-[8.75rem] lg:text-[10rem]";
+
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-full px-2 py-2 select-none overflow-hidden">
+    <div className="flex flex-col items-center justify-center w-full max-w-full px-1 py-1 sm:py-2 select-none overflow-hidden">
       {isEditable && isEditing ? (
         <form onSubmit={handleCommit} className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-150 w-full max-w-full">
           {/* Dakika Giriş Alanı */}
@@ -68,7 +74,7 @@ export function TimerDisplay({
                 onBlur={() => handleCommit()}
                 onKeyDown={handleKeyDown}
                 autoFocus
-                className="text-[clamp(3.5rem,15vw,5rem)] md:text-[8rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-36 sm:w-48 md:w-64 leading-none tabular-nums"
+                className="text-[clamp(3.75rem,18vw,6.5rem)] md:text-[8.5rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-36 sm:w-48 md:w-64 leading-none tabular-nums font-black"
               />
               <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mt-1">
                 Dakika
@@ -89,11 +95,12 @@ export function TimerDisplay({
         >
           <div 
             className={cn(
-              "text-[clamp(2.75rem,13vw,5.5rem)] sm:text-[6.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none whitespace-nowrap transition-transform duration-200 group-hover:scale-[1.01] w-full text-center px-1",
+              sizeClass,
+              "font-mono tabular-nums font-black tracking-tight leading-none whitespace-nowrap transition-transform duration-200 group-hover:scale-[1.01] w-full text-center px-1",
               colorClass
             )}
           >
-            {formatSeconds(displayedSeconds, format)}
+            {timeString}
           </div>
           <span className="text-xs font-semibold text-slate-500 dark:text-zinc-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors mt-2 flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/80 px-3 py-1 rounded-full border border-slate-200 dark:border-zinc-700 shadow-xs">
             <Edit2 size={12} className="text-blue-600 dark:text-blue-400" />
@@ -103,11 +110,12 @@ export function TimerDisplay({
       ) : (
         <div 
           className={cn(
-            "text-[clamp(2.75rem,13vw,5.5rem)] sm:text-[6.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none whitespace-nowrap w-full text-center px-1",
+            sizeClass,
+            "font-mono tabular-nums font-black tracking-tight leading-none whitespace-nowrap w-full text-center px-1",
             colorClass
           )}
         >
-          {formatSeconds(displayedSeconds, format)}
+          {timeString}
         </div>
       )}
     </div>
