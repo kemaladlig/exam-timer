@@ -9,10 +9,21 @@ interface ModalProps {
   title: string;
   children: React.ReactNode;
   className?: string;
+  contentClassName?: string;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+  bottomSheet?: boolean;
 }
 
-export function Modal({ isOpen, onClose, title, children, className, maxWidth = 'md' }: ModalProps) {
+export function Modal({ 
+  isOpen, 
+  onClose, 
+  title, 
+  children, 
+  className, 
+  contentClassName,
+  maxWidth = 'md',
+  bottomSheet = true,
+}: ModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,28 +60,46 @@ export function Modal({ isOpen, onClose, title, children, className, maxWidth = 
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      className={cn(
+        'fixed inset-0 z-50 flex justify-center bg-black/60 backdrop-blur-xs animate-in fade-in duration-200',
+        bottomSheet 
+          ? 'items-end sm:items-center p-0 sm:p-4' 
+          : 'items-center p-4'
+      )}
     >
       <div
         className={cn(
-          'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 w-full rounded-2xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800 flex flex-col max-h-[90vh]',
+          'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 w-full shadow-2xl flex flex-col',
+          bottomSheet
+            ? 'rounded-t-3xl sm:rounded-2xl border-t sm:border border-slate-200 dark:border-zinc-800 max-h-[92dvh] sm:max-h-[90vh] animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200'
+            : 'rounded-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh]',
           maxWidthClasses[maxWidth],
           className
         )}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-zinc-800">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
+        {/* Mobile drag handle */}
+        {bottomSheet && (
+          <div className="sm:hidden flex justify-center pt-2.5 pb-0.5 shrink-0">
+            <div className="w-10 h-1.2 rounded-full bg-slate-300 dark:bg-zinc-700" />
+          </div>
+        )}
+
+        {/* Modal Header */}
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-zinc-800 shrink-0">
+          <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white truncate pr-2">{title}</h2>
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onClose} 
             aria-label="Close modal" 
-            className="-mr-2 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white"
+            className="-mr-1.5 text-slate-400 hover:text-slate-700 dark:text-zinc-400 dark:hover:text-white h-8 w-8"
           >
-            <X size={20} />
+            <X size={18} />
           </Button>
         </div>
-        <div className="p-6 overflow-y-auto">
+
+        {/* Modal Body */}
+        <div className={cn("p-4 sm:p-6 overflow-y-auto overscroll-contain flex-1", contentClassName)}>
           {children}
         </div>
       </div>

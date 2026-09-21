@@ -226,13 +226,15 @@ export function CheckpointList({
               {EXAM_PRESETS.map((preset) => {
                 const shortLabel = preset.id === 'kpss-lisans' 
                   ? 'KPSS' 
-                  : preset.id === 'yks-tyt' 
-                    ? 'TYT' 
-                    : preset.id === 'meb-ags' 
-                      ? 'AGS' 
-                      : preset.id === 'osym-ales' 
-                        ? 'ALES' 
-                        : preset.name.split(' ')[0];
+                  : preset.id === 'kpss-gy-gk'
+                    ? 'KPSS (GY-GK)'
+                    : preset.id === 'yks-tyt' 
+                      ? 'TYT' 
+                      : preset.id === 'meb-ags' 
+                        ? 'AGS' 
+                        : preset.id === 'osym-ales' 
+                          ? 'ALES' 
+                          : preset.name.split(' ')[0];
 
                 return (
                   <button

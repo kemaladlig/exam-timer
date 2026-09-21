@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { formatSeconds } from '../../utils';
 import type { TimeDisplayFormat, TimerMode } from '../../types';
 import { cn } from '../../utils';
@@ -24,12 +24,11 @@ export function TimerDisplay({
   
   const minInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (!isEditing) {
-      const mins = Math.floor(displayedSeconds / 60);
-      setInputMinutes(mins.toString());
-    }
-  }, [displayedSeconds, isEditing]);
+  const handleStartEditing = () => {
+    const mins = Math.floor(displayedSeconds / 60);
+    setInputMinutes(mins.toString());
+    setIsEditing(true);
+  };
 
   const handleCommit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -53,12 +52,12 @@ export function TimerDisplay({
   const colorClass = "text-slate-900 dark:text-white";
 
   return (
-    <div className="flex flex-col items-center justify-center w-full py-2">
+    <div className="flex flex-col items-center justify-center w-full max-w-full px-2 py-2 select-none overflow-hidden">
       {isEditable && isEditing ? (
-        <form onSubmit={handleCommit} className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-150">
+        <form onSubmit={handleCommit} className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-150 w-full max-w-full">
           {/* Dakika Giriş Alanı */}
-          <div className="flex items-center justify-center font-mono tabular-nums font-bold tracking-tighter leading-none text-slate-900 dark:text-white">
-            <div className="flex flex-col items-center">
+          <div className="flex items-center justify-center font-mono tabular-nums font-bold tracking-tighter leading-none text-slate-900 dark:text-white w-full">
+            <div className="flex flex-col items-center max-w-full">
               <input
                 ref={minInputRef}
                 type="number"
@@ -69,7 +68,7 @@ export function TimerDisplay({
                 onBlur={() => handleCommit()}
                 onKeyDown={handleKeyDown}
                 autoFocus
-                className="text-[5rem] md:text-[8rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-40 md:w-64 leading-none"
+                className="text-[clamp(3.5rem,15vw,5rem)] md:text-[8rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-36 sm:w-48 md:w-64 leading-none tabular-nums"
               />
               <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mt-1">
                 Dakika
@@ -77,20 +76,20 @@ export function TimerDisplay({
             </div>
           </div>
 
-          <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-2.5">
+          <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-2.5 text-center px-4">
             Kaydetmek için Enter'a basın veya dışarı dokunun
           </span>
         </form>
       ) : isEditable ? (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={handleStartEditing}
           title="Süreyi doğrudan değiştirmek için dokunun"
-          className="group flex flex-col items-center cursor-pointer transition-transform active:scale-[0.98] outline-none"
+          className="group flex flex-col items-center justify-center cursor-pointer transition-transform active:scale-[0.98] outline-none w-full max-w-full"
         >
           <div 
             className={cn(
-              "text-[5.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none transition-transform duration-200 group-hover:scale-[1.02]",
+              "text-[clamp(2.75rem,13vw,5.5rem)] sm:text-[6.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none whitespace-nowrap transition-transform duration-200 group-hover:scale-[1.01] w-full text-center px-1",
               colorClass
             )}
           >
@@ -104,7 +103,7 @@ export function TimerDisplay({
       ) : (
         <div 
           className={cn(
-            "text-[5.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none",
+            "text-[clamp(2.75rem,13vw,5.5rem)] sm:text-[6.5rem] md:text-[8.5rem] font-mono tabular-nums font-bold tracking-tighter leading-none whitespace-nowrap w-full text-center px-1",
             colorClass
           )}
         >

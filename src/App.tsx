@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
+import { AppLogo } from './components/ui/AppLogo';
 import { TimerDisplay } from './components/timer/TimerDisplay';
 import { TimerControls } from './components/timer/TimerControls';
 import { CheckpointList } from './components/checkpoints/CheckpointList';
-import { SessionSummaryModal } from './components/stats/SessionSummaryModal';
-import { SettingsModal } from './components/settings/SettingsModal';
+import { SessionSummaryModal, QuickNetModal } from './components/stats';
+import { SettingsModal } from './components/settings';
 import { useExamSession, useTimer, useFullscreen, useWakeLock, usePWAInstall } from './hooks';
 import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession } from './types';
 import { EXAM_PRESETS } from './constants/presets';
-import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Timer, Download, Smartphone, CheckCircle2, Settings } from 'lucide-react';
+import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Download, Smartphone, CheckCircle2, Settings, Calculator } from 'lucide-react';
 import { Button } from './components/ui/Button';
 import { formatDurationHuman } from './utils';
 
@@ -83,6 +84,7 @@ function App() {
   // Non-blocking report state
   const [lastFinishedSession, setLastFinishedSession] = useState<ExamSession | null>(null);
   const [showDetailedModal, setShowDetailedModal] = useState(false);
+  const [isNetModalOpen, setIsNetModalOpen] = useState(false);
 
   // Dynamic sections state (initialized with KPSS by default)
   const [sections, setSections] = useState<SectionConfig[]>(() => {
@@ -224,10 +226,8 @@ function App() {
       
       {/* Top Navbar */}
       <header className="px-5 py-3.5 pt-[calc(0.875rem+env(safe-area-inset-top,0px))] flex justify-between items-center w-full z-20 sticky top-0 bg-slate-50/95 dark:bg-zinc-950/95 backdrop-blur-sm transition-colors duration-200">
-        <div className="font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-white shadow-xs">
-            <Timer size={16} />
-          </div>
+        <div className="font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-2.5">
+          <AppLogo size={28} className="shadow-xs" />
           <span className="text-slate-900 dark:text-white font-bold">Sınav Kronometresi</span>
           {lastFinishedSession && (
             <button
@@ -241,7 +241,18 @@ function App() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Net Hesapla Butonu */}
+          <button
+            type="button"
+            onClick={() => setIsNetModalOpen(true)}
+            className="h-9 px-2.5 sm:px-3 rounded-lg font-bold text-xs border border-blue-200 dark:border-blue-900/60 bg-blue-50/90 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
+            title="Hızlı Net Hesaplayıcı"
+          >
+            <Calculator size={15} className="text-blue-600 dark:text-blue-400" />
+            <span className="hidden xs:inline">Net Hesapla</span>
+          </button>
+
           {/* Uygulamayı Yükle Butonu (Sadece ikon, animasyonlu) */}
           {canInstall && (
             <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
@@ -303,7 +314,7 @@ function App() {
           <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center justify-center ${
             hasStarted 
               ? 'max-h-0 opacity-0 -translate-y-2 pointer-events-none mb-0' 
-              : 'max-h-16 opacity-100 translate-y-0 mb-2'
+              : 'max-h-14 opacity-100 translate-y-0 mb-2'
           }`}>
             <div className="flex items-center p-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs text-xs font-semibold">
               <button
@@ -446,6 +457,7 @@ function App() {
         isOpen={showDetailedModal}
         onClose={() => setShowDetailedModal(false)}
         session={lastFinishedSession}
+        onUpdateSession={(updated) => setLastFinishedSession(updated)}
         onRestart={() => {
           setShowDetailedModal(false);
           setLastFinishedSession(null);
@@ -506,6 +518,13 @@ function App() {
         onChangeTimeFormat={setTimeFormat}
         showProgressBar={showProgressBar}
         onToggleProgressBar={handleToggleProgressBar}
+      />
+
+      {/* Hızlı Net Hesaplayıcı Modalı (Menü / Sekme / Buton ile doğrudan erişim) */}
+      <QuickNetModal
+        isOpen={isNetModalOpen}
+        onClose={() => setIsNetModalOpen(false)}
+        lastFinishedSession={lastFinishedSession}
       />
     </div>
   );
