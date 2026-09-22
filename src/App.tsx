@@ -265,98 +265,106 @@ function App() {
   return (
     <div className="min-h-screen flex-1 flex flex-col bg-slate-50 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50 font-sans relative transition-colors duration-200">
       
-      {/* Zen Modu için Minimalist Köşe Butonu (Yazısız, Dikkat Dağıtmayan) */}
-      {zenMode && (
+      {/* Zen Modu için Minimalist Köşe Butonu (Yazısız, Yumuşak Giriş/Çıkış Animasyonlu) */}
+      <div className={`fixed top-3.5 right-3.5 z-30 transition-zen-smooth ${
+        zenMode 
+          ? 'opacity-100 translate-y-0 scale-100 pointer-events-auto' 
+          : 'opacity-0 -translate-y-2 scale-90 pointer-events-none'
+      }`}>
         <button
           type="button"
           onClick={() => handleToggleZenMode(false)}
-          className="fixed top-3.5 right-3.5 z-30 w-8 h-8 rounded-full bg-white/70 dark:bg-zinc-900/70 backdrop-blur-md border border-slate-200/60 dark:border-zinc-800/60 text-indigo-600 dark:text-indigo-400 opacity-40 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xs flex items-center justify-center"
+          className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 text-indigo-600 dark:text-indigo-400 opacity-50 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xs flex items-center justify-center"
           title="Zen Modundan Çık"
           aria-label="Zen Modundan Çık"
         >
           <Focus size={16} />
         </button>
-      )}
+      </div>
 
-      {/* Top Navbar (Zen Modunda Tamamen Gizlenir) */}
-      {!zenMode && (
-        <header className="px-4 sm:px-5 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex justify-between items-center w-full z-20 sticky top-0 bg-slate-50/95 dark:bg-zinc-950/95 backdrop-blur-sm transition-colors duration-200">
-          <div className="flex items-center gap-2.5">
-            <AppLogo size={30} className="shadow-xs" />
-            {lastFinishedSession && (
-              <button
-                onClick={() => setShowDetailedModal(true)}
-                className="text-xs bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-900 px-2.5 py-1 rounded-lg font-bold hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
-                title="Son seans raporunu incele"
-              >
-                <Eye size={12} />
-                <span>Son Seans</span>
-              </button>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            {/* Zen Modu Hızlı Açma Butonu */}
-            <button
-              type="button"
-              onClick={() => handleToggleZenMode(true)}
-              className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
-              title="Zen Modu (Tam Odak)"
-              aria-label="Zen Modu"
-            >
-              <Focus size={17} />
-            </button>
-
-            {/* Net Hesapla Butonu */}
-            <button
-              type="button"
-              onClick={() => setIsNetModalOpen(true)}
-              className="h-9 px-2.5 sm:px-3 rounded-lg font-bold text-xs border border-blue-200 dark:border-blue-900/60 bg-blue-50/90 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
-              title="Hızlı Net Hesaplayıcı"
-            >
-              <Calculator size={15} className="text-blue-600 dark:text-blue-400" />
-              <span className="hidden xs:inline">Net Hesapla</span>
-            </button>
-
-            {/* Uygulamayı Yükle Butonu (Sadece ikon, animasyonlu) */}
-            {canInstall && (
-              <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
-                hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
-              }`}>
+      {/* Top Navbar (Zen Moduna Yumuşakça Kapanıp Açılan Animasyon) */}
+      <div className={`w-full z-20 sticky top-0 grid transition-zen-grid bg-slate-50/95 dark:bg-zinc-950/95 backdrop-blur-sm ${
+        zenMode ? 'grid-rows-[0fr] opacity-0 pointer-events-none' : 'grid-rows-[1fr] opacity-100'
+      }`}>
+        <div className="overflow-hidden">
+          <header className="px-4 sm:px-5 py-3 pt-[calc(0.75rem+env(safe-area-inset-top,0px))] flex justify-between items-center w-full">
+            <div className="flex items-center gap-2.5">
+              <AppLogo size={30} className="shadow-xs" />
+              {lastFinishedSession && (
                 <button
-                  type="button"
-                  onClick={installApp}
-                  className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
-                  title="Uygulamayı Cihazına Yükle"
+                  onClick={() => setShowDetailedModal(true)}
+                  className="text-xs bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-300 border border-blue-200 dark:border-blue-900 px-2.5 py-1 rounded-lg font-bold hover:bg-blue-100 transition-colors flex items-center gap-1 shadow-xs cursor-pointer"
+                  title="Son seans raporunu incele"
                 >
-                  <Download size={16} className="text-blue-600 dark:text-blue-400" />
+                  <Eye size={12} />
+                  <span>Son Seans</span>
                 </button>
-              </div>
-            )}
+              )}
+            </div>
 
-            {/* Görünüm ve Ayarlar Butonu */}
-            <button
-              type="button"
-              onClick={() => setIsSettingsOpen(true)}
-              className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
-              title="Görünüm ve Ayarlar"
-            >
-              <Settings size={17} className="text-slate-600 dark:text-zinc-300" />
-            </button>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Zen Modu Hızlı Açma Butonu */}
+              <button
+                type="button"
+                onClick={() => handleToggleZenMode(true)}
+                className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
+                title="Zen Modu (Tam Odak)"
+                aria-label="Zen Modu"
+              >
+                <Focus size={17} />
+              </button>
 
-            {/* Tema Değiştirici */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleToggleTheme}
-              title="Temayı Değiştir"
-              className="rounded-full w-9 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 cursor-pointer"
-            >
-              {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </Button>
-          </div>
-        </header>
-      )}
+              {/* Net Hesapla Butonu */}
+              <button
+                type="button"
+                onClick={() => setIsNetModalOpen(true)}
+                className="h-9 px-2.5 sm:px-3 rounded-lg font-bold text-xs border border-blue-200 dark:border-blue-900/60 bg-blue-50/90 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/80 transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
+                title="Hızlı Net Hesaplayıcı"
+              >
+                <Calculator size={15} className="text-blue-600 dark:text-blue-400" />
+                <span className="hidden xs:inline">Net Hesapla</span>
+              </button>
+
+              {/* Uygulamayı Yükle Butonu (Sadece ikon, animasyonlu) */}
+              {canInstall && (
+                <div className={`transition-all duration-300 ease-in-out overflow-hidden flex items-center ${
+                  hasStarted ? 'max-w-0 opacity-0 pointer-events-none scale-90' : 'max-w-xs opacity-100 scale-100'
+                }`}>
+                  <button
+                    type="button"
+                    onClick={installApp}
+                    className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
+                    title="Uygulamayı Cihazına Yükle"
+                  >
+                    <Download size={16} className="text-blue-600 dark:text-blue-400" />
+                  </button>
+                </div>
+              )}
+
+              {/* Görünüm ve Ayarlar Butonu */}
+              <button
+                type="button"
+                onClick={() => setIsSettingsOpen(true)}
+                className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-300 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
+                title="Görünüm ve Ayarlar"
+              >
+                <Settings size={17} className="text-slate-600 dark:text-zinc-300" />
+              </button>
+
+              {/* Tema Değiştirici */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleTheme}
+                title="Temayı Değiştir"
+                className="rounded-full w-9 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 cursor-pointer"
+              >
+                {isDarkMode ? <Sun size={18} /> : <Moon size={18} />}
+              </Button>
+            </div>
+          </header>
+        </div>
+      </div>
 
       {/* Top Sticky Minimalist Zen Ambient Line */}
       {showProgressBar && timerMode === 'countdown' && countdownTotalSeconds > 0 && (
@@ -371,92 +379,96 @@ function App() {
       )}
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col overflow-y-auto z-10 ${zenMode ? 'justify-center items-center py-8' : ''}`}>
+      <main className="flex-1 flex flex-col items-center justify-between overflow-y-auto z-10 w-full">
         
-        {/* Timer & Controls Master Section */}
-        <div className="flex flex-col items-center justify-center pt-2 md:pt-4 pb-2 w-full">
+        {/* Timer & Controls Master Section (Sabit, Sarsıntısız ve Ortalanmış) */}
+        <div className={`flex-1 flex flex-col items-center justify-center w-full px-2 py-4 sm:py-6 transition-zen-smooth ${
+          zenMode ? 'my-auto' : ''
+        }`}>
           
-          {/* Sınav Tipi & Mod Seçim Bölümü (SÜRENİN ÜSTÜNDE - Animasyonla Yukarı Kaybolur) */}
-          <div className={`transition-all duration-300 ease-in-out overflow-hidden flex flex-col items-center justify-center w-full px-3 ${
-            hasStarted 
-              ? 'max-h-0 opacity-0 -translate-y-3 pointer-events-none mb-0' 
-              : 'max-h-56 opacity-100 translate-y-0 mb-3'
+          {/* Sınav Tipi & Mod Seçim Bölümü (SÜRENİN ÜSTÜNDE - Sarsıntısız Grid Kapanma) */}
+          <div className={`w-full grid transition-zen-grid ${
+            hasStarted || zenMode
+              ? 'grid-rows-[0fr] opacity-0 pointer-events-none' 
+              : 'grid-rows-[1fr] opacity-100 mb-3'
           }`}>
-            {/* 1. Mod Seçimi (Geri Sayım / Kronometre) */}
-            <div className="flex items-center p-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs text-xs font-semibold mb-2">
-              <button
-                onClick={() => handleChangeMode('countdown')}
-                className={`px-4 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer ${
-                  timerMode === 'countdown'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <ArrowDownUp size={13} />
-                Geri Sayım
-              </button>
-              <button
-                onClick={() => handleChangeMode('stopwatch')}
-                className={`px-4 py-1.5 rounded-full transition-all cursor-pointer ${
-                  timerMode === 'stopwatch'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                Kronometre
-              </button>
-            </div>
-
-            {/* 2. Sınav Tipi & Süre Preseti Barı (Tek Satır, Yana Kaydırılabilir) */}
-            {timerMode === 'countdown' && (
-              <div className="w-full max-w-xl px-2">
-                <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth">
-                  {EXAM_PRESETS.map((preset) => {
-                    const isSelected = selectedPresetId === preset.id && countdownTotalSeconds === preset.totalDurationSeconds;
-                    const minutes = Math.round(preset.totalDurationSeconds / 60);
-
-                    return (
-                      <button
-                        key={preset.id}
-                        onClick={() => handleSelectExamPreset(preset)}
-                        className={`shrink-0 whitespace-nowrap text-xs px-3 py-1.5 rounded-full font-semibold border transition-all active:scale-95 cursor-pointer flex items-center gap-1 shadow-xs ${
-                          isSelected
-                            ? 'bg-blue-600 border-blue-600 text-white font-bold ring-2 ring-blue-500/20'
-                            : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800'
-                        }`}
-                        title={`${preset.name} - ${minutes} Dakika (${preset.sections.length} Ders)`}
-                      >
-                        <span>{preset.name}</span>
-                        <span className={`text-[11px] ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-zinc-500'}`}>
-                          ({minutes} dk)
-                        </span>
-                      </button>
-                    );
-                  })}
-
-                  {/* Ayraç */}
-                  <div className="h-4 w-px bg-slate-300 dark:bg-zinc-700 mx-1 shrink-0" />
-
-                  {/* Hızlı Dakika Butonları */}
-                  {QUICK_MINUTES.map((quick) => {
-                    const isSelected = selectedPresetId === null && countdownTotalSeconds === quick.minutes * 60;
-                    return (
-                      <button
-                        key={quick.minutes}
-                        onClick={() => handleSelectCustomDuration(quick.minutes)}
-                        className={`shrink-0 whitespace-nowrap text-xs px-2.5 py-1.5 rounded-full font-semibold border transition-all active:scale-95 cursor-pointer shadow-xs ${
-                          isSelected
-                            ? 'bg-blue-600 border-blue-600 text-white font-bold ring-2 ring-blue-500/20'
-                            : 'bg-white/90 border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-zinc-900/90 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800'
-                        }`}
-                      >
-                        {quick.label}
-                      </button>
-                    );
-                  })}
-                </div>
+            <div className="overflow-hidden flex flex-col items-center justify-center w-full px-3">
+              {/* 1. Mod Seçimi (Geri Sayım / Kronometre) */}
+              <div className="flex items-center p-1 rounded-full border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-xs text-xs font-semibold mb-2">
+                <button
+                  onClick={() => handleChangeMode('countdown')}
+                  className={`px-4 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer ${
+                    timerMode === 'countdown'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  <ArrowDownUp size={13} />
+                  Geri Sayım
+                </button>
+                <button
+                  onClick={() => handleChangeMode('stopwatch')}
+                  className={`px-4 py-1.5 rounded-full transition-all cursor-pointer ${
+                    timerMode === 'stopwatch'
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white'
+                  }`}
+                >
+                  Kronometre
+                </button>
               </div>
-            )}
+
+              {/* 2. Sınav Tipi & Süre Preseti Barı (Tek Satır, Yana Kaydırılabilir) */}
+              {timerMode === 'countdown' && (
+                <div className="w-full max-w-xl px-2">
+                  <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth">
+                    {EXAM_PRESETS.map((preset) => {
+                      const isSelected = selectedPresetId === preset.id && countdownTotalSeconds === preset.totalDurationSeconds;
+                      const minutes = Math.round(preset.totalDurationSeconds / 60);
+
+                      return (
+                        <button
+                          key={preset.id}
+                          onClick={() => handleSelectExamPreset(preset)}
+                          className={`shrink-0 whitespace-nowrap text-xs px-3 py-1.5 rounded-full font-semibold border transition-all active:scale-95 cursor-pointer flex items-center gap-1 shadow-xs ${
+                            isSelected
+                              ? 'bg-blue-600 border-blue-600 text-white font-bold ring-2 ring-blue-500/20'
+                              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-800'
+                          }`}
+                          title={`${preset.name} - ${minutes} Dakika (${preset.sections.length} Ders)`}
+                        >
+                          <span>{preset.name}</span>
+                          <span className={`text-[11px] ${isSelected ? 'text-blue-100' : 'text-slate-400 dark:text-zinc-500'}`}>
+                            ({minutes} dk)
+                          </span>
+                        </button>
+                      );
+                    })}
+
+                    {/* Ayraç */}
+                    <div className="h-4 w-px bg-slate-300 dark:bg-zinc-700 mx-1 shrink-0" />
+
+                    {/* Hızlı Dakika Butonları */}
+                    {QUICK_MINUTES.map((quick) => {
+                      const isSelected = selectedPresetId === null && countdownTotalSeconds === quick.minutes * 60;
+                      return (
+                        <button
+                          key={quick.minutes}
+                          onClick={() => handleSelectCustomDuration(quick.minutes)}
+                          className={`shrink-0 whitespace-nowrap text-xs px-2.5 py-1.5 rounded-full font-semibold border transition-all active:scale-95 cursor-pointer shadow-xs ${
+                            isSelected
+                              ? 'bg-blue-600 border-blue-600 text-white font-bold ring-2 ring-blue-500/20'
+                              : 'bg-white/90 border-slate-200 text-slate-600 hover:bg-slate-50 dark:bg-zinc-900/90 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800'
+                          }`}
+                        >
+                          {quick.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Huge Timer Display (Süreyi Doğrudan Değiştirme Desteğiyle) */}
@@ -470,7 +482,7 @@ function App() {
           />
 
           {/* Controls - Doğrudan Sürenin Altında ve Birleşik */}
-          <div className="mt-2 w-full max-w-sm px-4 transition-all duration-300">
+          <div className="mt-3 w-full max-w-sm px-4">
              <TimerControls 
                 isRunning={isRunning}
                 isFullscreen={isFullscreen}
@@ -484,25 +496,29 @@ function App() {
           </div>
         </div>
 
-        {/* Content Section: Zen Modunda Tamamen Saf (Boş/Odak), Normal Modda Tam Ders Listesi */}
-        {!zenMode && (
-          <div className="flex-1 w-full bg-slate-100/70 dark:bg-zinc-900/40 border-t border-slate-200/80 dark:border-zinc-800/80 mt-2 flex flex-col justify-between">
-             <div className={`flex-1 transition-opacity duration-300 ${hasStarted ? 'opacity-100' : 'opacity-95'}`}>
-               <CheckpointList 
-                  sections={sections} 
-                  checkpoints={activeSession.checkpoints}
-                  onCompleteSection={(id, name, qc) => addCheckpoint(id, name, elapsedSeconds, qc)}
-                  onGenericCheckpoint={(name) => addGenericCheckpoint(elapsedSeconds, name)}
-                  onUndoLastCheckpoint={undoLastCheckpoint}
-                  onRemoveCheckpoint={removeCheckpoint}
-                  onAddSection={handleAddSection}
-                  onRemoveSection={handleRemoveSection}
-                  onApplyPreset={handleApplyPreset}
-                  hasStarted={hasStarted}
-                />
-             </div>
+        {/* Content Section: Zen Modunda Sarsıntısız Kapanan Ders Listesi Grid'i */}
+        <div className={`w-full grid transition-zen-grid border-t ${
+          zenMode 
+            ? 'grid-rows-[0fr] opacity-0 border-transparent pointer-events-none' 
+            : 'grid-rows-[1fr] opacity-100 border-slate-200/80 dark:border-zinc-800/80 bg-slate-100/70 dark:bg-zinc-900/40'
+        }`}>
+          <div className="overflow-hidden flex flex-col justify-between">
+            <div className={`flex-1 transition-opacity duration-300 ${hasStarted ? 'opacity-100' : 'opacity-95'}`}>
+              <CheckpointList 
+                sections={sections} 
+                checkpoints={activeSession.checkpoints}
+                onCompleteSection={(id, name, qc) => addCheckpoint(id, name, elapsedSeconds, qc)}
+                onGenericCheckpoint={(name) => addGenericCheckpoint(elapsedSeconds, name)}
+                onUndoLastCheckpoint={undoLastCheckpoint}
+                onRemoveCheckpoint={removeCheckpoint}
+                onAddSection={handleAddSection}
+                onRemoveSection={handleRemoveSection}
+                onApplyPreset={handleApplyPreset}
+                hasStarted={hasStarted}
+              />
+            </div>
           </div>
-        )}
+        </div>
       </main>
 
       {/* Engellemeyen Zarif Seans Özeti Bildirimi */}
