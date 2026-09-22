@@ -61,7 +61,7 @@ export function Modal({
       ref={overlayRef}
       onClick={handleOverlayClick}
       className={cn(
-        'fixed inset-0 z-50 flex justify-center bg-black/60 backdrop-blur-xs animate-in fade-in duration-200',
+        'fixed inset-0 z-50 flex justify-center bg-black/60 backdrop-blur-xs animate-modal-backdrop',
         bottomSheet 
           ? 'items-end sm:items-center p-0 sm:p-4' 
           : 'items-center p-4'
@@ -69,10 +69,10 @@ export function Modal({
     >
       <div
         className={cn(
-          'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 w-full shadow-2xl flex flex-col',
+          'bg-white dark:bg-zinc-900 text-slate-900 dark:text-zinc-100 w-full shadow-2xl flex flex-col will-change-transform',
           bottomSheet
-            ? 'rounded-t-3xl sm:rounded-2xl border-t sm:border border-slate-200 dark:border-zinc-800 max-h-[92dvh] sm:max-h-[90vh] animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200'
-            : 'rounded-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh]',
+            ? 'rounded-t-3xl sm:rounded-2xl border-t sm:border border-slate-200 dark:border-zinc-800 max-h-[92dvh] sm:max-h-[90vh] animate-sheet-slide sm:animate-modal-content'
+            : 'rounded-2xl border border-slate-200 dark:border-zinc-800 max-h-[90vh] animate-modal-content',
           maxWidthClasses[maxWidth],
           className
         )}

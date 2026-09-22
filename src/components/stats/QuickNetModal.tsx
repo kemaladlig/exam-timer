@@ -520,6 +520,14 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
     );
   };
 
+  // Handle Done action: dismiss virtual keyboard on mobile and close modal
+  const handleDone = () => {
+    if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    onClose();
+  };
+
   return (
     <Modal 
       isOpen={isOpen} 
@@ -773,11 +781,11 @@ export const QuickNetModal: React.FC<QuickNetModalProps> = ({
           <div className="flex items-center gap-2 ml-auto">
             <Button
               variant="primary"
-              onClick={onClose}
-              className="h-9 px-4 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 active:scale-98 text-white shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
+              onClick={handleDone}
+              className="h-9 px-5 rounded-xl font-bold text-xs sm:text-sm bg-blue-600 hover:bg-blue-700 active:scale-98 text-white shadow-2xs cursor-pointer flex items-center justify-center gap-1.5"
             >
-              <Check size={14} />
-              <span>{hasSession && activeTab === 'session' ? 'Kaydet ve Kapat' : 'Kapat'}</span>
+              <Check size={15} />
+              <span>Bitti</span>
             </Button>
           </div>
         </div>

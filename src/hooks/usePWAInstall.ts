@@ -7,23 +7,19 @@ interface BeforeInstallPromptEvent extends Event {
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isStandalone, setIsStandalone] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [isStandalone] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.matchMedia('(display-mode: standalone)').matches || 
+      (window.navigator as any).standalone === true;
+  });
+  const [isIOS] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    const userAgent = window.navigator.userAgent.toLowerCase();
+    return /iphone|ipad|ipod/.test(userAgent) && !(window as any).MSStream;
+  });
   const [showIOSModal, setShowIOSModal] = useState(false);
 
   useEffect(() => {
-    // Uygulama zaten ana ekrandan standalone açılmış mı kontrolü
-    const isStandaloneMode = 
-      window.matchMedia('(display-mode: standalone)').matches || 
-      (window.navigator as any).standalone === true;
-    
-    setIsStandalone(isStandaloneMode);
-
-    // iOS cihaz tespiti
-    const userAgent = window.navigator.userAgent.toLowerCase();
-    const isIosDevice = /iphone|ipad|ipod/.test(userAgent) && !(window as any).MSStream;
-    setIsIOS(isIosDevice);
-
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);

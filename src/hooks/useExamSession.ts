@@ -132,6 +132,15 @@ export function useExamSession() {
     }));
   }, []);
 
+  const updateSessionConfig = useCallback((title: string, durationSeconds: number, templateId?: string) => {
+    setActiveSession((prev) => ({
+      ...prev,
+      examTitle: title,
+      totalAllocatedSeconds: durationSeconds,
+      examTemplateId: templateId || prev.examTemplateId,
+    }));
+  }, []);
+
   const clearSession = useCallback(() => {
     const preset = EXAM_PRESETS[0];
     setActiveSession({
@@ -150,6 +159,7 @@ export function useExamSession() {
   return {
     activeSession,
     startSession,
+    updateSessionConfig,
     addCheckpoint,
     addGenericCheckpoint,
     undoLastCheckpoint,

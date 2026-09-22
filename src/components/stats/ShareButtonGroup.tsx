@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessageCircle, Image, Copy, Check, Loader2 } from 'lucide-react';
+import { MessageCircle, Phone, Image, Copy, Check, Loader2 } from 'lucide-react';
 import { 
   type ShareCardData, 
   formatWhatsAppReport, 
@@ -51,15 +51,19 @@ export function ShareButtonGroup({ data, className = '' }: ShareButtonGroupProps
 
   return (
     <div className={`flex items-center gap-1.5 ${className}`}>
-      {/* WhatsApp Icon Button */}
+      {/* WhatsApp Button with Authentic WhatsApp Brand Appearance */}
       <button
         type="button"
         onClick={handleWhatsApp}
-        className="w-9 h-9 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white transition-all cursor-pointer flex items-center justify-center shadow-2xs shrink-0"
-        title="WhatsApp'ta Paylaş"
-        aria-label="WhatsApp'ta Paylaş"
+        className="h-9 px-2.5 sm:px-3 rounded-xl bg-[#25D366] hover:bg-[#20ba59] active:scale-95 text-white transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-2xs shrink-0 font-bold text-xs"
+        title="WhatsApp ile Paylaş"
+        aria-label="WhatsApp ile Paylaş"
       >
-        <MessageCircle size={16} className="fill-white/20" />
+        <div className="relative flex items-center justify-center w-4.5 h-4.5 shrink-0">
+          <MessageCircle size={18} className="text-white fill-white" />
+          <Phone size={8} className="text-[#25D366] fill-[#25D366] absolute -rotate-[35deg] translate-x-[0.5px] -translate-y-[0.5px]" />
+        </div>
+        <span className="hidden xs:inline">WhatsApp</span>
       </button>
 
       {/* Image Card Share / Download Icon Button */}
@@ -67,7 +71,7 @@ export function ShareButtonGroup({ data, className = '' }: ShareButtonGroupProps
         type="button"
         onClick={handleImageShare}
         disabled={isGeneratingImage}
-        className="w-9 h-9 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white transition-all cursor-pointer flex items-center justify-center shadow-2xs shrink-0 disabled:opacity-70"
+        className="h-9 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white transition-all cursor-pointer flex items-center justify-center gap-1 shadow-2xs shrink-0 disabled:opacity-70 font-bold text-xs"
         title="Sonuç Kartını Resim Olarak Paylaş / İndir"
         aria-label="Sonuç Kartını Resim Olarak Paylaş / İndir"
       >
@@ -78,6 +82,7 @@ export function ShareButtonGroup({ data, className = '' }: ShareButtonGroupProps
         ) : (
           <Image size={16} />
         )}
+        <span className="hidden sm:inline">Kart</span>
       </button>
 
       {/* Copy Text Icon Button */}

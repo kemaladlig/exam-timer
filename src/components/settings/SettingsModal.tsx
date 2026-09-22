@@ -1,6 +1,6 @@
 import { Modal } from '../ui/Modal';
 import type { TimeDisplayFormat } from '../../types';
-import { Clock, Sliders, Check } from 'lucide-react';
+import { Clock, Sliders, Check, Focus } from 'lucide-react';
 import { cn } from '../../utils';
 
 interface SettingsModalProps {
@@ -10,6 +10,8 @@ interface SettingsModalProps {
   onChangeTimeFormat: (format: TimeDisplayFormat) => void;
   showProgressBar: boolean;
   onToggleProgressBar: (show: boolean) => void;
+  zenMode: boolean;
+  onToggleZenMode: (enabled: boolean) => void;
 }
 
 export function SettingsModal({
@@ -19,6 +21,8 @@ export function SettingsModal({
   onChangeTimeFormat,
   showProgressBar,
   onToggleProgressBar,
+  zenMode,
+  onToggleZenMode,
 }: SettingsModalProps) {
   const formatOptions: { id: TimeDisplayFormat; label: string; example: string }[] = [
     { id: 'hh:mm:ss', label: 'Saat : Dk : Sn', example: '02:09:39' },
@@ -104,6 +108,42 @@ export function SettingsModal({
                 className={cn(
                   'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out',
                   showProgressBar ? 'translate-x-5' : 'translate-x-0'
+                )}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Zen Modu (Odaklanma - Default Kapalı) */}
+        <div className="pt-4 border-t border-slate-100 dark:border-zinc-800/80">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 pr-4">
+              <div className="flex items-center gap-2">
+                <Focus size={16} className="text-indigo-600 dark:text-indigo-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Zen Modu (Odaklanma)
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Süre akarken gereksiz yan ögeleri ve butonları gizleyerek ekranı tamamen saf kronometreye odaklar.
+              </p>
+            </div>
+
+            {/* Toggle Switch */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={zenMode}
+              onClick={() => onToggleZenMode(!zenMode)}
+              className={cn(
+                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                zenMode ? 'bg-indigo-600' : 'bg-slate-200 dark:bg-zinc-700'
+              )}
+            >
+              <span
+                className={cn(
+                  'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out',
+                  zenMode ? 'translate-x-5' : 'translate-x-0'
                 )}
               />
             </button>

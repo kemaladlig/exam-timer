@@ -1,5 +1,6 @@
 export type TimerMode = 'countdown' | 'stopwatch';
 export type TimeDisplayFormat = 'mm:ss' | 'hh:mm:ss' | 'm_only';
+export type TimerFontSize = 'normal' | 'large' | 'huge';
 
 export interface SectionConfig {
   id: string;

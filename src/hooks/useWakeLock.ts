@@ -2,12 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 
 export function useWakeLock(isActive: boolean) {
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported] = useState(() => typeof navigator !== 'undefined' && 'wakeLock' in navigator);
   const [isLocked, setIsLocked] = useState(false);
-
-  useEffect(() => {
-    setIsSupported('wakeLock' in navigator);
-  }, []);
 
   useEffect(() => {
     if (!isSupported || !isActive) {

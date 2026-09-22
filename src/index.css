@@ -5,6 +5,13 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
 }
 
 /* Süzülerek Gelme (Slide Down & Fade In) */
@@ -80,6 +87,40 @@
   }
 }
 
+/* Modal Arka Planı (Fade In) */
+@keyframes modalBackdropFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Modal Penceresi (Zoom & Fade In) */
+@keyframes modalContentPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.94) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Mobilde Alttan Süzülen Bottom Sheet */
+@keyframes sheetSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-slide-down {
   animation: slideDownFade 0.42s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -100,6 +141,18 @@
 
 .animate-toast-in {
   animation: toastSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-backdrop {
+  animation: modalBackdropFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-modal-content {
+  animation: modalContentPopIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-sheet-slide {
+  animation: sheetSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 /* Pürüzsüz ve Eşzamanlı Tema Geçişi */

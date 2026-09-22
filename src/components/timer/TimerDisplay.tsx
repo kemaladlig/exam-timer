@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react';
 import { formatSeconds } from '../../utils';
-import type { TimeDisplayFormat, TimerMode } from '../../types';
+import type { TimeDisplayFormat, TimerMode, TimerFontSize } from '../../types';
 import { cn } from '../../utils';
 import { Edit2 } from 'lucide-react';
 
@@ -9,6 +9,7 @@ interface TimerDisplayProps {
   remainingSeconds: number;
   mode: TimerMode;
   format: TimeDisplayFormat;
+  fontSize?: TimerFontSize;
   isEditable?: boolean;
   onDurationChange?: (totalSeconds: number) => void;
 }
@@ -16,6 +17,7 @@ interface TimerDisplayProps {
 export function TimerDisplay({ 
   displayedSeconds, 
   format,
+  fontSize = 'large',
   isEditable = false,
   onDurationChange
 }: TimerDisplayProps) {
@@ -52,17 +54,42 @@ export function TimerDisplay({
   const colorClass = "text-slate-900 dark:text-white";
 
   const timeString = formatSeconds(displayedSeconds, format);
-  // Shorter strings (e.g. 5 chars "25:00") can be even larger than 8 char strings ("01:25:00")
-  const sizeClass = timeString.length <= 5 
-    ? "text-[clamp(3.75rem,19vw,7.5rem)] sm:text-[7.5rem] md:text-[9.5rem] lg:text-[11rem]"
-    : "text-[clamp(3.25rem,15.5vw,6.5rem)] sm:text-[6.75rem] md:text-[8.75rem] lg:text-[10rem]";
+  
+  // Responsive font size calculated based on selected fontSize option and string length
+  let sizeClass = "";
+  if (fontSize === 'normal') {
+    if (timeString.length <= 5) {
+      sizeClass = "text-[clamp(3.5rem,18vw,7rem)] sm:text-[7rem] md:text-[8.5rem] lg:text-[10rem]";
+    } else if (timeString.length === 6) {
+      sizeClass = "text-[clamp(3.25rem,16vw,6.5rem)] sm:text-[6.5rem] md:text-[8rem] lg:text-[9.5rem]";
+    } else {
+      sizeClass = "text-[clamp(3rem,14.5vw,6rem)] sm:text-[6rem] md:text-[7.5rem] lg:text-[9rem]";
+    }
+  } else if (fontSize === 'huge') {
+    if (timeString.length <= 5) {
+      sizeClass = "text-[clamp(5rem,26vw,10.5rem)] sm:text-[10.5rem] md:text-[12rem] lg:text-[14rem]";
+    } else if (timeString.length === 6) {
+      sizeClass = "text-[clamp(4.5rem,23vw,9.5rem)] sm:text-[9.5rem] md:text-[11rem] lg:text-[13rem]";
+    } else {
+      sizeClass = "text-[clamp(4rem,20vw,8.5rem)] sm:text-[8.5rem] md:text-[10.5rem] lg:text-[12rem]";
+    }
+  } else {
+    // 'large' (Varsayılan - Geniş ve telefon için ideal)
+    if (timeString.length <= 5) {
+      sizeClass = "text-[clamp(4.5rem,23.5vw,9.5rem)] sm:text-[9.5rem] md:text-[11rem] lg:text-[13rem]";
+    } else if (timeString.length === 6) {
+      sizeClass = "text-[clamp(4.15rem,21vw,8.5rem)] sm:text-[8.5rem] md:text-[10rem] lg:text-[12rem]";
+    } else {
+      sizeClass = "text-[clamp(3.75rem,18.5vw,7.75rem)] sm:text-[7.75rem] md:text-[9.5rem] lg:text-[11rem]";
+    }
+  }
 
   return (
-    <div className="flex flex-col items-center justify-center w-full max-w-full px-1 py-1 sm:py-2 select-none overflow-hidden">
+    <div className="flex flex-col items-center justify-center w-full max-w-full px-1 py-0.5 sm:py-2 select-none overflow-hidden">
       {isEditable && isEditing ? (
         <form onSubmit={handleCommit} className="flex flex-col items-center animate-in fade-in zoom-in-95 duration-150 w-full max-w-full">
           {/* Dakika Giriş Alanı */}
-          <div className="flex items-center justify-center font-mono tabular-nums font-bold tracking-tighter leading-none text-slate-900 dark:text-white w-full">
+          <div className="flex items-center justify-center font-mono tabular-nums font-black tracking-tighter leading-none text-slate-900 dark:text-white w-full">
             <div className="flex flex-col items-center max-w-full">
               <input
                 ref={minInputRef}
@@ -74,7 +101,7 @@ export function TimerDisplay({
                 onBlur={() => handleCommit()}
                 onKeyDown={handleKeyDown}
                 autoFocus
-                className="text-[clamp(3.75rem,18vw,6.5rem)] md:text-[8.5rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-36 sm:w-48 md:w-64 leading-none tabular-nums font-black"
+                className="text-[clamp(4.5rem,22vw,8.5rem)] sm:text-[8.5rem] md:text-[10rem] text-center bg-transparent border-b-4 border-blue-600 dark:border-blue-500 focus:outline-none w-44 sm:w-56 md:w-72 leading-none tabular-nums font-black"
               />
               <span className="text-xs font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider mt-1">
                 Dakika
@@ -96,7 +123,7 @@ export function TimerDisplay({
           <div 
             className={cn(
               sizeClass,
-              "font-mono tabular-nums font-black tracking-tight leading-none whitespace-nowrap transition-transform duration-200 group-hover:scale-[1.01] w-full text-center px-1",
+              "font-mono tabular-nums font-black tracking-tighter leading-none whitespace-nowrap transition-transform duration-200 group-hover:scale-[1.01] w-full text-center px-1",
               colorClass
             )}
           >
@@ -111,7 +138,7 @@ export function TimerDisplay({
         <div 
           className={cn(
             sizeClass,
-            "font-mono tabular-nums font-black tracking-tight leading-none whitespace-nowrap w-full text-center px-1",
+            "font-mono tabular-nums font-black tracking-tighter leading-none whitespace-nowrap w-full text-center px-1",
             colorClass
           )}
         >

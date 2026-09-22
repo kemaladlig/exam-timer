@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from 'react';
-import { BookmarkPlus, RotateCcw, Plus, ChevronDown, ChevronUp, Clock, X, Pin, CheckCircle2, BookmarkCheck, Layers, Sparkles } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { BookmarkPlus, RotateCcw, Plus, ChevronDown, ChevronUp, Clock, X, Pin, CheckCircle2, BookmarkCheck, Trash2, Sparkles } from 'lucide-react';
 import type { SectionConfig, CheckpointRecord, CustomPreset } from '../../types';
 import { EXAM_PRESETS } from '../../constants/presets';
 import { CheckpointCard } from './CheckpointCard';
@@ -53,26 +53,6 @@ export function CheckpointList({
 
   // Çıkış (silme/geri alma) animasyonundaki elemanların ID listesi
   const [exitingIds, setExitingIds] = useState<Set<string>>(new Set());
-
-  // Yalnızca yeni eklenen kaydın ID'si (silme sırasında 1. sıraya kayan eski kayıtların tekrar oynamasını engeller)
-  const [justAddedId, setJustAddedId] = useState<string | null>(null);
-  const prevCheckpointsCountRef = useRef(checkpoints.length);
-
-  useEffect(() => {
-    // Sadece eleman sayısı arttığında (yeni kayıt geldiğinde) animasyon tetikle
-    if (checkpoints.length > prevCheckpointsCountRef.current) {
-      const latest = checkpoints[checkpoints.length - 1];
-      if (latest) {
-        setJustAddedId(latest.id);
-        const timer = setTimeout(() => {
-          setJustAddedId(null);
-        }, 500);
-        prevCheckpointsCountRef.current = checkpoints.length;
-        return () => clearTimeout(timer);
-      }
-    }
-    prevCheckpointsCountRef.current = checkpoints.length;
-  }, [checkpoints]);
 
   const handleAnimatedRemoveCheckpoint = (checkpointId: string) => {
     setExitingIds(prev => new Set(prev).add(checkpointId));
@@ -255,7 +235,7 @@ export function CheckpointList({
                 className="py-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-1 transition-transform active:scale-95 bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 shadow-xs hover:text-red-500 dark:hover:text-red-400 cursor-pointer ml-auto"
                 title="Ders listesini boşalt"
               >
-                <Layers size={13} />
+                <Trash2 size={13} />
                 <span>Temizle</span>
               </button>
             </div>
@@ -418,16 +398,13 @@ export function CheckpointList({
                 <div className="px-3 py-1 space-y-0.5 divide-y divide-slate-100 dark:divide-zinc-800/60 max-h-44 overflow-y-auto">
                   {allRecordedCheckpoints.map((cp) => {
                     const isExiting = exitingIds.has(cp.id);
-                    const isJustAdded = cp.id === justAddedId;
                     return (
                       <div 
                         key={cp.id} 
                         className={`py-2 flex items-center justify-between text-xs transition-all duration-300 ${
                           isExiting 
                             ? 'animate-slide-out' 
-                            : isJustAdded 
-                            ? 'animate-slide-down' 
-                            : ''
+                            : 'animate-slide-down'
                         }`}
                       >
                         <div className="flex items-center gap-2 min-w-0">

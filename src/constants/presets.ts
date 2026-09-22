@@ -3,7 +3,7 @@ import type { ExamTemplate } from '../types';
 export const EXAM_PRESETS: ExamTemplate[] = [
   {
     id: 'kpss-lisans',
-    name: 'KPSS Lisans',
+    name: 'KPSS',
     description: '130 Dakika - Türkçe (30), Matematik (30), Tarih (27), Coğrafya (18), Vatandaşlık (15)',
     defaultMode: 'countdown',
     totalDurationSeconds: 130 * 60, // 130 minutes
@@ -17,8 +17,8 @@ export const EXAM_PRESETS: ExamTemplate[] = [
   },
   {
     id: 'yks-tyt',
-    name: 'YKS - TYT',
-    description: '165 Dakika - Türkçe, Sosyal, Matematik, Fen',
+    name: 'TYT',
+    description: '165 Dakika - Türkçe (40), Sosyal Bilimler (20), Temel Matematik (40), Fen Bilimleri (20)',
     defaultMode: 'countdown',
     totalDurationSeconds: 165 * 60, // 165 minutes
     sections: [
@@ -29,23 +29,24 @@ export const EXAM_PRESETS: ExamTemplate[] = [
     ],
   },
   {
-    id: 'meb-ags',
-    name: 'MEB - AGS',
-    description: '110 Dakika - Türkçe, Matematik, Tarih, Coğrafya, Eğitimin Temelleri, Mevzuat',
+    id: 'yks-ayt',
+    name: 'AYT',
+    description: '180 Dakika - Matematik (40), Fizik (14), Kimya (13), Biyoloji (13), Edebiyat (24), Tarih (10), Coğrafya (6)',
     defaultMode: 'countdown',
-    totalDurationSeconds: 110 * 60, // 110 minutes
+    totalDurationSeconds: 180 * 60, // 180 minutes
     sections: [
-      { id: 'ags-tr', name: 'Türkçe' },
-      { id: 'ags-mat', name: 'Matematik' },
-      { id: 'ags-tar', name: 'Tarih' },
-      { id: 'ags-cog', name: 'Coğrafya' },
-      { id: 'ags-egt', name: 'Eğitimin Temelleri' },
-      { id: 'ags-mev', name: 'Türk Milli Eğitim Mevzuatı' },
+      { id: 'ayt-mat', name: 'Matematik', questionCount: 40 },
+      { id: 'ayt-fiz', name: 'Fizik', questionCount: 14 },
+      { id: 'ayt-kim', name: 'Kimya', questionCount: 13 },
+      { id: 'ayt-biy', name: 'Biyoloji', questionCount: 13 },
+      { id: 'ayt-edb', name: 'Edebiyat', questionCount: 24 },
+      { id: 'ayt-tar', name: 'Tarih-1', questionCount: 10 },
+      { id: 'ayt-cog', name: 'Coğrafya-1', questionCount: 6 },
     ],
   },
   {
     id: 'osym-ales',
-    name: 'ÖSYM - ALES',
+    name: 'ALES',
     description: '150 Dakika - Sayısal (50), Sözel (50)',
     defaultMode: 'countdown',
     totalDurationSeconds: 150 * 60, // 150 minutes
@@ -55,3 +56,4 @@ export const EXAM_PRESETS: ExamTemplate[] = [
     ],
   },
 ];
+
