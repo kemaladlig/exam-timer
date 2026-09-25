@@ -9,13 +9,13 @@ export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone] = useState(() => {
     if (typeof window === 'undefined') return false;
-    return window.matchMedia('(display-mode: standalone)').matches || 
-      (window.navigator as any).standalone === true;
+    return window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
   });
   const [isIOS] = useState(() => {
     if (typeof window === 'undefined') return false;
     const userAgent = window.navigator.userAgent.toLowerCase();
-    return /iphone|ipad|ipod/.test(userAgent) && !(window as any).MSStream;
+    return /iphone|ipad|ipod/.test(userAgent) && !window.MSStream;
   });
   const [showIOSModal, setShowIOSModal] = useState(false);
 

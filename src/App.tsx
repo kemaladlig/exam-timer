@@ -1,17 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
-import { flushSync } from 'react-dom';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AppLogo } from './components/ui/AppLogo';
 import { TimerDisplay } from './components/timer/TimerDisplay';
 import { TimerControls } from './components/timer/TimerControls';
 import { CheckpointList } from './components/checkpoints/CheckpointList';
 import { SessionSummaryModal, QuickNetModal } from './components/stats';
 import { SettingsModal } from './components/settings';
-import { useExamSession, useTimer, useFullscreen, useWakeLock, usePWAInstall } from './hooks';
+import {
+  useExamSession,
+  useTimer,
+  useFullscreen,
+  useWakeLock,
+  usePWAInstall,
+  useTheme,
+  useUiPrefs,
+  useLocalStorage,
+} from './hooks';
 import type { TimeDisplayFormat, TimerMode, SectionConfig, ExamSession, ExamTemplate } from './types';
 import { EXAM_PRESETS } from './constants/presets';
 import { Moon, Sun, ArrowDownUp, FileDown, X, Eye, Download, Smartphone, Settings, Calculator, Focus, CheckCircle2 } from 'lucide-react';
 import { Button } from './components/ui/Button';
-import { formatDurationHuman } from './utils';
+import {
+  formatDurationHuman,
+  STORAGE_KEYS,
+  loadResumeState,
+  saveTimerSnapshot,
+  playThresholdChime,
+} from './utils';
 
 const QUICK_MINUTES = [
   { label: '60 dk', minutes: 60 },
@@ -34,107 +48,49 @@ function App() {
 
   const { isFullscreen, toggleFullscreen } = useFullscreen();
   const { canInstall, installApp, showIOSModal, setShowIOSModal } = usePWAInstall();
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') return true;
-    if (saved === 'light') return false;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-  });
+  const { isDarkMode, toggleTheme } = useTheme();
+  const {
+    showProgressBar,
+    toggleProgressBar,
+    zenMode,
+    toggleZenMode,
+    thresholdAlerts,
+    toggleThresholdAlerts,
+  } = useUiPrefs();
 
-  const handleToggleTheme = () => {
-    const nextTheme = !isDarkMode;
-    // Modern View Transitions API (Sıfır senkron kayması, ekran görüntüsü üzerinden tek kare crossfade)
-    if (typeof document !== 'undefined' && 'startViewTransition' in document) {
-      (document as any).startViewTransition(() => {
-        flushSync(() => {
-          setIsDarkMode(nextTheme);
-          if (nextTheme) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-          }
-        });
-      });
-    } else {
-      setIsDarkMode(nextTheme);
-    }
-  };
-  
-  // Varsayılan format 'hh:mm:ss' (Saat : Dk : Sn)
   const [timeFormat, setTimeFormat] = useState<TimeDisplayFormat>('hh:mm:ss');
-  
-  // Ayarlar Modalı, İlerleme Çubuğu ve Zen Modu Durumu
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [showProgressBar, setShowProgressBar] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return true;
-    const saved = localStorage.getItem('exam_show_progress_bar');
-    return saved !== null ? saved === 'true' : true;
-  });
 
-  const handleToggleProgressBar = (show: boolean) => {
-    setShowProgressBar(show);
-    localStorage.setItem('exam_show_progress_bar', String(show));
-  };
+  // Kalıcı kurulum (mod, süre, seçili şablon, dersler)
+  const [timerMode, setTimerMode] = useLocalStorage<TimerMode>(STORAGE_KEYS.timerMode, 'countdown');
+  const [countdownTotalSeconds, setCountdownTotalSeconds] = useLocalStorage<number>(
+    STORAGE_KEYS.durationSeconds,
+    130 * 60,
+  );
+  const [selectedPresetId, setSelectedPresetId] = useLocalStorage<string | null>(
+    STORAGE_KEYS.selectedPresetId,
+    'kpss-lisans',
+  );
+  const [sections, setSections] = useLocalStorage<SectionConfig[]>(
+    STORAGE_KEYS.sections,
+    EXAM_PRESETS.find((p) => p.id === 'kpss-lisans')?.sections ?? [],
+  );
 
-  // Zen Modu (Odaklanma - Default kapalı/false)
-  const [zenMode, setZenMode] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    const saved = localStorage.getItem('exam_zen_mode');
-    return saved !== null ? saved === 'true' : false;
-  });
+  // Yüklemede kalıcı sayaç durumunu bir kez oku
+  const [resumeState] = useState(loadResumeState);
 
-  const handleToggleZenMode = (enabled: boolean) => {
-    setZenMode(enabled);
-    localStorage.setItem('exam_zen_mode', String(enabled));
-  };
-
-  // Non-blocking report state
-  const [lastFinishedSession, setLastFinishedSession] = useState<ExamSession | null>(null);
+  // Non-blocking report state — tamamlanmışsa kalıcı oturumdan geri yükle
+  const [lastFinishedSession, setLastFinishedSession] = useState<ExamSession | null>(() =>
+    activeSession.completedAt ? activeSession : null,
+  );
   const [showDetailedModal, setShowDetailedModal] = useState(false);
   const [isNetModalOpen, setIsNetModalOpen] = useState(false);
 
-  // Dynamic sections state (initialized with KPSS by default)
-  const [sections, setSections] = useState<SectionConfig[]>(() => {
-    return EXAM_PRESETS.find(p => p.id === 'kpss-lisans')?.sections || [];
-  });
-
-  // Seçili sınav şablonu takibi
-  const [selectedPresetId, setSelectedPresetId] = useState<string | null>('kpss-lisans');
-
-  // Mode state: countdown varsayılan
-  const [timerMode, setTimerMode] = useState<TimerMode>('countdown');
-  const [countdownTotalSeconds, setCountdownTotalSeconds] = useState<number>(130 * 60);
-
-  useEffect(() => {
-    const themeColor = isDarkMode ? '#09090b' : '#f8fafc';
-    if (isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-
-    // Mobil telefonlarda durum çubuğu rengini hem iOS hem Android için anında güncelle
-    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
-    metaTags.forEach(tag => tag.setAttribute('content', themeColor));
-
-    // Chromium / Android cihazlarda durum çubuğu yeniden çizimini tetiklemek için dinamik etiket ekle
-    const dynamicId = 'theme-color-dynamic-override';
-    const oldDynamic = document.getElementById(dynamicId);
-    if (oldDynamic) oldDynamic.remove();
-    
-    const freshMeta = document.createElement('meta');
-    freshMeta.id = dynamicId;
-    freshMeta.name = 'theme-color';
-    freshMeta.content = themeColor;
-    document.head.appendChild(freshMeta);
-  }, [isDarkMode]);
-
   const initialSeconds = timerMode === 'countdown' ? countdownTotalSeconds : 0;
+
+  const handleThreshold = useCallback(() => {
+    if (thresholdAlerts) playThresholdChime();
+  }, [thresholdAlerts]);
 
   const handleTimerFinish = () => {
     handleFinishExam();
@@ -151,15 +107,47 @@ function App() {
     initialSeconds,
     mode: timerMode,
     onFinish: handleTimerFinish,
+    onThreshold: handleThreshold,
+    resumeElapsedSeconds: resumeState.elapsedSeconds,
+    resumeRunning: resumeState.running,
   });
 
   // Ekranı süre akarken sessizce arka planda açık tutuyoruz (UI yazısına gerek yok!)
   useWakeLock(isRunning);
 
+  // Sayaç durumu snapshot'ı için en güncel değerler (yalnızca olay/effect içinde okunur)
+  const timerStateRef = useRef({ running: isRunning, elapsed: elapsedSeconds });
+  useEffect(() => {
+    timerStateRef.current = { running: isRunning, elapsed: elapsedSeconds };
+  });
+
+  useEffect(() => {
+    const persist = () => {
+      const { running, elapsed } = timerStateRef.current;
+      saveTimerSnapshot(running, elapsed);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') persist();
+    };
+    window.addEventListener('pagehide', persist);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      window.removeEventListener('pagehide', persist);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, []);
+
+  // Başlat/duraklat geçişinde anında kaydet (tick başına değil)
+  useEffect(() => {
+    const { running, elapsed } = timerStateRef.current;
+    saveTimerSnapshot(running, elapsed);
+  }, [isRunning]);
+
   const handleQuickReset = useCallback(() => {
     if (isRunning) toggleTimer();
     resetTimer();
     resetSessionCheckpoints();
+    saveTimerSnapshot(false, 0);
   }, [isRunning, toggleTimer, resetTimer, resetSessionCheckpoints]);
 
   const handleFinishExam = useCallback(() => {
@@ -200,7 +188,7 @@ function App() {
     updateSessionConfig(preset.name, preset.totalDurationSeconds, preset.id);
     resetTimer();
     resetSessionCheckpoints();
-  }, [isRunning, toggleTimer, updateSessionConfig, resetTimer, resetSessionCheckpoints]);
+  }, [isRunning, toggleTimer, updateSessionConfig, resetTimer, resetSessionCheckpoints, setSelectedPresetId, setSections, setCountdownTotalSeconds, setTimerMode]);
 
   // Hızlı Süre Seçimi (Dakika)
   const handleSelectCustomDuration = useCallback((minutes: number) => {
@@ -211,7 +199,7 @@ function App() {
     updateSessionConfig(`${minutes} Dk Deneme`, minutes * 60, 'custom');
     resetTimer();
     resetSessionCheckpoints();
-  }, [isRunning, toggleTimer, updateSessionConfig, resetTimer, resetSessionCheckpoints]);
+  }, [isRunning, toggleTimer, updateSessionConfig, resetTimer, resetSessionCheckpoints, setSelectedPresetId, setCountdownTotalSeconds, setTimerMode]);
 
   const handleSelectCountdownDuration = (totalSeconds: number) => {
     if (isRunning) toggleTimer();
@@ -273,7 +261,7 @@ function App() {
       }`}>
         <button
           type="button"
-          onClick={() => handleToggleZenMode(false)}
+          onClick={() => toggleZenMode(false)}
           className="w-8 h-8 rounded-full bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-slate-200/80 dark:border-zinc-800/80 text-indigo-600 dark:text-indigo-400 opacity-50 hover:opacity-100 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-xs flex items-center justify-center"
           title="Zen Modundan Çık"
           aria-label="Zen Modundan Çık"
@@ -306,7 +294,7 @@ function App() {
               {/* Zen Modu Hızlı Açma Butonu */}
               <button
                 type="button"
-                onClick={() => handleToggleZenMode(true)}
+                onClick={() => toggleZenMode(true)}
                 className="w-9 h-9 rounded-lg font-medium border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-colors shadow-xs cursor-pointer flex items-center justify-center"
                 title="Zen Modu (Tam Odak)"
                 aria-label="Zen Modu"
@@ -355,7 +343,7 @@ function App() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleToggleTheme}
+                onClick={toggleTheme}
                 title="Temayı Değiştir"
                 className="rounded-full w-9 h-9 text-slate-600 hover:text-slate-900 hover:bg-slate-200 dark:text-zinc-400 dark:hover:text-white dark:hover:bg-zinc-800 cursor-pointer"
               >
@@ -370,7 +358,13 @@ function App() {
       {showProgressBar && timerMode === 'countdown' && countdownTotalSeconds > 0 && (
         <div className={`sticky ${zenMode ? 'top-0' : 'top-[calc(3.5rem+env(safe-area-inset-top,0px))]'} z-20 w-full h-[2px] bg-slate-200/50 dark:bg-zinc-800/60 overflow-hidden pointer-events-none`}>
           <div
-            className="h-full bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.35)] transition-all duration-1000 ease-linear rounded-r-full"
+            className={`h-full transition-all duration-1000 ease-linear rounded-r-full ${
+              remainingSeconds <= 60
+                ? 'bg-rose-500/80 dark:bg-rose-500/70 shadow-[0_0_8px_rgba(244,63,94,0.28)]'
+                : remainingSeconds <= 300
+                  ? 'bg-amber-500/80 dark:bg-amber-500/70 shadow-[0_0_8px_rgba(245,158,11,0.25)]'
+                  : 'bg-blue-600 dark:bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.35)]'
+            }`}
             style={{
               width: `${Math.min(100, Math.max(0, (remainingSeconds / countdownTotalSeconds) * 100))}%`
             }}
@@ -630,9 +624,11 @@ function App() {
         timeFormat={timeFormat}
         onChangeTimeFormat={setTimeFormat}
         showProgressBar={showProgressBar}
-        onToggleProgressBar={handleToggleProgressBar}
+        onToggleProgressBar={toggleProgressBar}
         zenMode={zenMode}
-        onToggleZenMode={handleToggleZenMode}
+        onToggleZenMode={toggleZenMode}
+        thresholdAlerts={thresholdAlerts}
+        onToggleThresholdAlerts={toggleThresholdAlerts}
       />
 
       {/* Hızlı Net Hesaplayıcı Modalı (Menü / Sekme / Buton ile doğrudan erişim) */}

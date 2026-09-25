@@ -1,6 +1,6 @@
 import { Modal } from '../ui/Modal';
 import type { TimeDisplayFormat } from '../../types';
-import { Clock, Sliders, Check, Focus } from 'lucide-react';
+import { Clock, Sliders, Check, Focus, Bell } from 'lucide-react';
 import { cn } from '../../utils';
 
 interface SettingsModalProps {
@@ -12,6 +12,8 @@ interface SettingsModalProps {
   onToggleProgressBar: (show: boolean) => void;
   zenMode: boolean;
   onToggleZenMode: (enabled: boolean) => void;
+  thresholdAlerts: boolean;
+  onToggleThresholdAlerts: (enabled: boolean) => void;
 }
 
 export function SettingsModal({
@@ -23,6 +25,8 @@ export function SettingsModal({
   onToggleProgressBar,
   zenMode,
   onToggleZenMode,
+  thresholdAlerts,
+  onToggleThresholdAlerts,
 }: SettingsModalProps) {
   const formatOptions: { id: TimeDisplayFormat; label: string; example: string }[] = [
     { id: 'hh:mm:ss', label: 'Saat : Dk : Sn', example: '02:09:39' },
@@ -144,6 +148,42 @@ export function SettingsModal({
                 className={cn(
                   'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out',
                   zenMode ? 'translate-x-5' : 'translate-x-0'
+                )}
+              />
+            </button>
+          </div>
+        </div>
+
+        {/* 4. Sessiz Eşik Uyarısı (Subtle) */}
+        <div className="pt-4 border-t border-slate-100 dark:border-zinc-800/80">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1 pr-4">
+              <div className="flex items-center gap-2">
+                <Bell size={16} className="text-amber-600 dark:text-amber-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Sessiz Eşik Uyarısı
+                </h3>
+              </div>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">
+                Kalan süre 15, 5 ve 1 dakikaya düştüğünde rakamlar yumuşakça renk değiştirir. Açarsan ek olarak tek, kısa ve hafif bir ton çalar.
+              </p>
+            </div>
+
+            {/* Toggle Switch */}
+            <button
+              type="button"
+              role="switch"
+              aria-checked={thresholdAlerts}
+              onClick={() => onToggleThresholdAlerts(!thresholdAlerts)}
+              className={cn(
+                'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
+                thresholdAlerts ? 'bg-amber-600' : 'bg-slate-200 dark:bg-zinc-700'
+              )}
+            >
+              <span
+                className={cn(
+                  'pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out',
+                  thresholdAlerts ? 'translate-x-5' : 'translate-x-0'
                 )}
               />
             </button>

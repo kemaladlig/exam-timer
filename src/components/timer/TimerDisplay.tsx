@@ -16,6 +16,7 @@ interface TimerDisplayProps {
 
 export function TimerDisplay({ 
   displayedSeconds, 
+  mode,
   format,
   fontSize = 'large',
   isEditable = false,
@@ -51,7 +52,13 @@ export function TimerDisplay({
     }
   };
 
-  const colorClass = "text-slate-900 dark:text-white";
+  // Subtle renk: yalnızca geri sayımda, zaman daraldıkça yumuşak ton geçişi
+  const colorClass =
+    mode === 'countdown' && displayedSeconds <= 60
+      ? 'text-rose-600 dark:text-rose-400'
+      : mode === 'countdown' && displayedSeconds <= 300
+        ? 'text-amber-600 dark:text-amber-400'
+        : 'text-slate-900 dark:text-white';
 
   const timeString = formatSeconds(displayedSeconds, format);
   
@@ -123,7 +130,7 @@ export function TimerDisplay({
           <div 
             className={cn(
               sizeClass,
-              "font-mono tabular-nums font-black tracking-tighter leading-none whitespace-nowrap transition-transform duration-200 group-hover:scale-[1.01] w-full text-center px-1",
+              "font-mono tabular-nums font-black tracking-tighter leading-none whitespace-nowrap transition-transform duration-200 transition-colors duration-500 group-hover:scale-[1.01] w-full text-center px-1",
               colorClass
             )}
           >
@@ -138,7 +145,7 @@ export function TimerDisplay({
         <div 
           className={cn(
             sizeClass,
-            "font-mono tabular-nums font-black tracking-tighter leading-none whitespace-nowrap w-full text-center px-1",
+            "font-mono tabular-nums font-black tracking-tighter leading-none whitespace-nowrap w-full text-center px-1 transition-colors duration-700",
             colorClass
           )}
         >

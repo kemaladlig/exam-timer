@@ -1,41 +1,66 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import type { TimerMode } from '../types';
+import { playCompletionSound } from '../utils/audio';
+
+export const TIME_THRESHOLDS_SECONDS = [900, 300, 60] as const;
 
 interface UseTimerProps {
   initialSeconds: number;
   mode: TimerMode;
   onFinish?: () => void;
+  onThreshold?: (secondsRemaining: number) => void;
+  thresholds?: readonly number[];
+  /** Yükleme anında kalıcıdan geri yüklenen geçen süre (sn). */
+  resumeElapsedSeconds?: number;
+  /** Kalıcıdan sayaç çalışırken mı geri yükleniyor. */
+  resumeRunning?: boolean;
 }
 
-export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
-  const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
+export function useTimer({
+  initialSeconds,
+  mode,
+  onFinish,
+  onThreshold,
+  thresholds = TIME_THRESHOLDS_SECONDS,
+  resumeElapsedSeconds = 0,
+  resumeRunning = false,
+}: UseTimerProps) {
+  const [elapsedSeconds, setElapsedSeconds] = useState(resumeElapsedSeconds);
+  const [isRunning, setIsRunning] = useState(resumeRunning);
 
-  // Keep a ref to onFinish so changing its reference doesn't restart the timer
+  // Referans değişse de sayaç yeniden başlamasın
   const onFinishRef = useRef(onFinish);
+  const onThresholdRef = useRef(onThreshold);
   useEffect(() => {
     onFinishRef.current = onFinish;
   }, [onFinish]);
+  useEffect(() => {
+    onThresholdRef.current = onThreshold;
+  }, [onThreshold]);
 
-  // Track the start time and accumulated elapsed time
-  const accumulatedElapsedRef = useRef(0);
+  // Zaman tabanı: başlangıç anı + biriken süre (drift'siz, wall-clock bazlı)
+  const accumulatedElapsedRef = useRef(resumeElapsedSeconds);
   const startTimestampRef = useRef<number | null>(null);
+
+  // Her eşik yalnızca bir kez tetiklensin
+  const alertedRef = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    alertedRef.current = new Set();
+  }, [initialSeconds, mode]);
 
   useEffect(() => {
     if (!isRunning) {
-      // Stopped/Paused
       startTimestampRef.current = null;
       return;
     }
 
-    // Started or Resumed
-    // We calculate the virtual start timestamp based on already accumulated seconds
-    const start = Date.now() - (accumulatedElapsedRef.current * 1000);
+    // Çalışırken sekme arka planda olabilir; elapsed'i her tick'te wall-clock'tan
+    // yeniden hesaplarız, böylece görünür olduğunda gecikmeli de olsa doğru tetiklenir.
+    const start = Date.now() - accumulatedElapsedRef.current * 1000;
     startTimestampRef.current = start;
 
     const intervalId = setInterval(() => {
-      const now = Date.now();
-      const totalElapsed = Math.floor((now - start) / 1000);
+      const totalElapsed = Math.floor((Date.now() - start) / 1000);
 
       if (mode === 'countdown' && initialSeconds > 0 && totalElapsed >= initialSeconds) {
         setElapsedSeconds(initialSeconds);
@@ -44,25 +69,38 @@ export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
         clearInterval(intervalId);
         playCompletionSound();
         onFinishRef.current?.();
-      } else {
-        setElapsedSeconds(totalElapsed);
-        accumulatedElapsedRef.current = totalElapsed;
+        return;
       }
-    }, 250); // Check every 250ms for snappy, zero-drift updates
+
+      setElapsedSeconds(totalElapsed);
+      accumulatedElapsedRef.current = totalElapsed;
+
+      // Sessiz eşik uyarısı: yalnızca sınav süresinin altında kalan eşikler
+      if (mode === 'countdown' && initialSeconds > 0) {
+        const remaining = initialSeconds - totalElapsed;
+        for (const t of thresholds) {
+          if (t < initialSeconds && remaining <= t && !alertedRef.current.has(t)) {
+            alertedRef.current.add(t);
+            onThresholdRef.current?.(t);
+          }
+        }
+      }
+    }, 250);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [isRunning, mode, initialSeconds]);
+  }, [isRunning, mode, initialSeconds, thresholds]);
 
   const toggleTimer = useCallback(() => {
-    setIsRunning(prev => !prev);
+    setIsRunning((prev) => !prev);
   }, []);
 
   const resetTimer = useCallback(() => {
     setIsRunning(false);
     accumulatedElapsedRef.current = 0;
     startTimestampRef.current = null;
+    alertedRef.current = new Set();
     setElapsedSeconds(0);
   }, []);
 
@@ -77,49 +115,4 @@ export function useTimer({ initialSeconds, mode, onFinish }: UseTimerProps) {
     toggleTimer,
     resetTimer,
   };
-}
-
-/**
- * Süre dolduğunda çalan huzurlu ve net melodi (Web Audio API)
- * Dışarıdan MP3 dosyası gerektirmez, çevrimdışı da anında çalar.
- */
-function playCompletionSound() {
-  try {
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-
-    // 4 tonlu uyumlu melodi: C5, E5, G5, C6 (Hafif ve net tamamlama çanı)
-    const notes = [
-      { freq: 523.25, time: 0, dur: 0.5 },
-      { freq: 659.25, time: 0.16, dur: 0.5 },
-      { freq: 783.99, time: 0.32, dur: 0.6 },
-      { freq: 1046.50, time: 0.48, dur: 1.6 },
-    ];
-
-    notes.forEach(({ freq, time, dur }) => {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, ctx.currentTime + time);
-
-      gain.gain.setValueAtTime(0, ctx.currentTime + time);
-      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + time + 0.04);
-      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + time + dur);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(ctx.currentTime + time);
-      osc.stop(ctx.currentTime + time + dur);
-    });
-
-    // Mobil telefonlarda titreşim desteği
-    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-      navigator.vibrate([250, 100, 250, 100, 400]);
-    }
-  } catch (e) {
-    console.warn('Completion sound could not be played:', e);
-  }
 }
